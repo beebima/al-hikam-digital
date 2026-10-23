@@ -13,12 +13,12 @@ public class MainActivity extends Activity {
  private View statusBarBacking;
  private View bottomBarBacking;
  private int activeStatusColor=Color.rgb(250,246,238);
- private static final int BOTTOM_COLOR=Color.rgb(234,247,240);
+ private static final int BOTTOM_COLOR=Color.rgb(42,83,66);
  private static final int NOTIFICATION_REQUEST=19;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
   getWindow().setStatusBarColor(Color.rgb(250,246,238));
-  getWindow().setNavigationBarColor(BOTTOM_COLOR);
+  getWindow().setNavigationBarColor(Color.TRANSPARENT);
   if(Build.VERSION.SDK_INT>=29){
    getWindow().setStatusBarContrastEnforced(false);
    getWindow().setNavigationBarContrastEnforced(false);
@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
          int c=Color.rgb(Integer.parseInt(p[0].trim()),Integer.parseInt(p[1].trim()),Integer.parseInt(p[2].trim()));
          if(bottomBarBacking!=null)bottomBarBacking.setBackgroundColor(c);
          if(frameForSystemBars!=null)frameForSystemBars.setBackgroundColor(c);
-         getWindow().setNavigationBarColor(c);
+         getWindow().setNavigationBarColor(Color.TRANSPARENT);
        }catch(Exception ignored){}
      });
    }

@@ -62,3 +62,11 @@ Compact Last Opened card between Progress/Tutorial and Ad-Free. Shows saved last
 - Native system navigation area uses the same computed background color as the banner, eliminating a white stripe.
 - The native navigation area is not counted as advertising space.
 - Device test required for Android 15 gesture and three-button navigation.
+
+## V1.0.3 — Remove bottom banner
+- Removed the bottom advertising banner entirely from HTML.
+- Bottom sticky menu is anchored at viewport bottom with Android navigation inset as internal padding.
+- Android navigation gesture area uses forest-green native backing, with transparent system navigation bar.
+- No extra ad placeholder or white gap below the bottom menu.
+- Header, Last Opened, progress/tutorial and other features preserved.
+- Requires APK device testing; Android 15 inset handling may vary by navigation mode.
