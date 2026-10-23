@@ -9,12 +9,13 @@ import android.view.*;
 import android.webkit.*;
 public class MainActivity extends Activity {
  private WebView web;
+ private android.widget.FrameLayout frameForSystemBars;
  private static final int NOTIFICATION_REQUEST=19;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
-  getWindow().setStatusBarColor(Color.rgb(22,65,53));
+  getWindow().setStatusBarColor(Color.rgb(250,246,238));
   getWindow().setNavigationBarColor(Color.rgb(22,65,53));
-  getWindow().getDecorView().setSystemUiVisibility(0);
+  getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
   web=new WebView(this);
   web.setBackgroundColor(Color.rgb(250,246,238));
   web.setLayerType(View.LAYER_TYPE_HARDWARE,null);
@@ -31,7 +32,21 @@ public class MainActivity extends Activity {
     }
   });
   web.addJavascriptInterface(new Object(){
-   @JavascriptInterface public void requestNotificationPermission(){
+   @JavascriptInterface public void setSystemBarColor(String hex,boolean splash){
+      runOnUiThread(()->{
+        try{
+          if(hex==null || !hex.matches("#[0-9a-fA-F]{6}"))return;
+          int color=Color.parseColor(hex);
+          getWindow().setStatusBarColor(color);
+          int flags=getWindow().getDecorView().getSystemUiVisibility();
+          if(splash)flags|=View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+          else flags&=~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+          getWindow().getDecorView().setSystemUiVisibility(flags);
+          if(frameForSystemBars!=null)frameForSystemBars.setBackgroundColor(color);
+        }catch(Exception ignored){}
+      });
+    }
+    @JavascriptInterface public void requestNotificationPermission(){
     runOnUiThread(()->{
      if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)
       requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},NOTIFICATION_REQUEST);
@@ -42,14 +57,16 @@ public class MainActivity extends Activity {
   },"AlHikamAndroid");
   // Explicitly respect Android status/navigation system bars, including Android 15 edge-to-edge.
   android.widget.FrameLayout frame=new android.widget.FrameLayout(this);
-  frame.setBackgroundColor(Color.rgb(22,65,53));
+  frame.setBackgroundColor(Color.rgb(250,246,238));
+  frameForSystemBars=frame;
   frame.addView(web,new android.widget.FrameLayout.LayoutParams(-1,-1));
   frame.setOnApplyWindowInsetsListener((view,insets)->{
    android.graphics.Insets bars;
    if(Build.VERSION.SDK_INT>=30){
     bars=insets.getInsets(WindowInsets.Type.statusBars()|WindowInsets.Type.navigationBars()|WindowInsets.Type.displayCutout());
     view.setPadding(bars.left,bars.top,bars.right,bars.bottom);
-    view.setBackgroundColor(Color.rgb(22,65,53));
+    // Keep the view backing synchronized with the active system-bar color.
+    view.setBackgroundColor(getWindow().getStatusBarColor());
    }else{
     view.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());
    }

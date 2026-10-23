@@ -20,3 +20,10 @@ Real-device profiling, signed AAB, AdMob integration and Google Play Billing. An
 - First-run tutorial launches automatically after splash (~3.9 s), only until user skips/completes.
 - Existing user localStorage tutorial completion is respected. To test first-run behavior, clear app data or reinstall.
 - This is a source project; GitHub Actions build and device performance still need validation.
+
+## V1.0.3 UI revision (version unchanged)
+- Settings: System Fonts card now precedes Content Fonts card.
+- Android status bar follows the active theme's top navigation background color.
+- While the splash is displayed, status bar uses splash cream (#FAF6EE) with dark status icons.
+- Native Android bridge validates six-digit hex colors; Android 15 inset backing follows the same color.
+- Requires rebuilding APK through GitHub Actions to see native changes.
