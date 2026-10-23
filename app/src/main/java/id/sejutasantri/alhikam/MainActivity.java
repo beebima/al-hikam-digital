@@ -68,6 +68,59 @@ public class MainActivity extends Activity {
    bottomBanner.loadAd(new AdRequest.Builder().build());
  }
 
+ // Step 6: reuse a small number of native AdViews for visible HTML ad positions.
+ private final java.util.LinkedHashMap<String,AdView> inlineBanners=new java.util.LinkedHashMap<>();
+ private final java.util.HashSet<String> inlineLoaded=new java.util.HashSet<>();
+ private static final int MAX_INLINE_VIEWS=3;
+ private void removeInlineBanner(String key){
+   AdView v=inlineBanners.remove(key);inlineLoaded.remove(key);
+   if(v!=null){adsOverlay.removeView(v);v.destroy();}
+ }
+ private void reconcileInlineBanners(String json){
+   if(adsOverlay==null||web==null||isFinishing())return;
+   try{
+     org.json.JSONArray items=new org.json.JSONArray(json);
+     java.util.LinkedHashMap<String,float[]> wanted=new java.util.LinkedHashMap<>();
+     for(int i=0;i<items.length()&&wanted.size()<MAX_INLINE_VIEWS;i++){
+       org.json.JSONObject item=items.optJSONObject(i);if(item==null)continue;
+       String key=item.optString("key","");if(!key.matches("slot-[0-9]+"))continue;
+       wanted.put(key,new float[]{(float)item.optDouble("left"),(float)item.optDouble("top"),(float)item.optDouble("width")});
+     }
+     for(String key:new java.util.ArrayList<>(inlineBanners.keySet()))if(!wanted.containsKey(key))removeInlineBanner(key);
+     for(java.util.Map.Entry<String,float[]> entry:wanted.entrySet()){
+       String key=entry.getKey();float[] pos=entry.getValue();
+       AdView ad=inlineBanners.get(key);
+       if(ad==null){
+         ad=new AdView(this);ad.setAdUnitId(TEST_BANNER_ID);ad.setAdSize(AdSize.BANNER);
+         ad.setVisibility(View.GONE);adsOverlay.addView(ad);
+         inlineBanners.put(key,ad);
+         final AdView target=ad;
+         ad.setAdListener(new AdListener(){
+           @Override public void onAdLoaded(){
+             if(inlineBanners.get(key)!=target)return;
+             inlineLoaded.add(key);
+             web.evaluateJavascript("window.alHikamInlineAdLoaded&&window.alHikamInlineAdLoaded('"+key+"',true)",null);
+           }
+           @Override public void onAdFailedToLoad(LoadAdError error){
+             inlineLoaded.remove(key);target.setVisibility(View.GONE);
+             web.evaluateJavascript("window.alHikamInlineAdLoaded&&window.alHikamInlineAdLoaded('"+key+"',false)",null);
+           }
+         });
+         ad.loadAd(new AdRequest.Builder().build());
+       }
+       if(inlineLoaded.contains(key)){
+         float density=getResources().getDisplayMetrics().density;
+         float scale=web.getScale();
+         int adWidth=Math.round(320*density),adHeight=Math.round(50*density);
+         int left=Math.round((pos[0]+pos[2]/2f)*scale)-adWidth/2+web.getLeft();
+         int top=Math.round(pos[1]*scale)+web.getTop();
+         FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(adWidth,adHeight,Gravity.TOP|Gravity.LEFT);
+         lp.leftMargin=Math.max(0,left);lp.topMargin=top;
+         ad.setLayoutParams(lp);ad.setVisibility(View.VISIBLE);
+       }else{ad.setVisibility(View.GONE);}
+     }
+   }catch(Exception ignored){}
+ }
  private InterstitialAd interstitialAd;
  private boolean interstitialShowing=false;
  private long lastInterstitialShownAt=System.currentTimeMillis();
@@ -143,6 +196,9 @@ public class MainActivity extends Activity {
    @JavascriptInterface public boolean isAdsFree(){return false;}
    @JavascriptInterface public void positionBottomBanner(double l,double t,double w,double h){
      runOnUiThread(()->updateBannerPosition((float)l,(float)t,(float)w,(float)h));
+   }
+   @JavascriptInterface public void syncInlineBanners(String json){
+     runOnUiThread(()->reconcileInlineBanners(json));
    }
    @JavascriptInterface public void hideBottomBanner(){
      runOnUiThread(()->{if(bottomBanner!=null)bottomBanner.setVisibility(View.GONE);});
@@ -242,8 +298,8 @@ public class MainActivity extends Activity {
   if(req==NOTIFICATION_REQUEST && results.length>0 && results[0]==PackageManager.PERMISSION_GRANTED)
    ReminderScheduler.schedule(this);
  }
- @Override protected void onPause(){if(bottomBanner!=null)bottomBanner.pause();super.onPause();}
- @Override protected void onResume(){super.onResume();if(bottomBanner!=null)bottomBanner.resume();}
- @Override protected void onDestroy(){if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
+ @Override protected void onPause(){if(bottomBanner!=null)bottomBanner.pause();for(AdView v:inlineBanners.values())v.pause();super.onPause();}
+ @Override protected void onResume(){super.onResume();if(bottomBanner!=null)bottomBanner.resume();for(AdView v:inlineBanners.values())v.resume();}
+ @Override protected void onDestroy(){for(String key:new java.util.ArrayList<>(inlineBanners.keySet()))removeInlineBanner(key);if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }

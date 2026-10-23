@@ -1,0 +1,11 @@
+AL-HIKAM DIGITAL v1.1.1 - STEP 6 TEST ADS
+
+1. Upload semua isi ZIP ke root repository GitHub menggantikan Step 5.
+2. Periksa Actions, kemudian pasang APK debug di HP.
+3. Scroll beranda, Daftar Isi, bab, daftar Kultum/Tausiah, artikel, dan Favorit.
+4. Native banner TEST ads dibuat hanya untuk hingga 3 slot yang dekat layar.
+5. Slot disembunyikan jika iklan gagal dimuat/tidak terlihat. Tidak ada tempat kosong permanen.
+6. Interstitial dan banner bawah dari Step 5 tetap tersedia.
+
+PENTING: Semua iklan memakai GOOGLE TEST AD UNIT. Google Play Billing belum terintegrasi.
+Premium tidak bisa diaktifkan sampai pembelian diverifikasi secara sah.
