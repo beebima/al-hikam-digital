@@ -27,3 +27,10 @@ Real-device profiling, signed AAB, AdMob integration and Google Play Billing. An
 - While the splash is displayed, status bar uses splash cream (#FAF6EE) with dark status icons.
 - Native Android bridge validates six-digit hex colors; Android 15 inset backing follows the same color.
 - Requires rebuilding APK through GitHub Actions to see native changes.
+
+## System bar hotfix (same version 1.0.3)
+- Separate top and bottom inset backing views for Android 15 edge-to-edge.
+- Top backing color follows JavaScript-selected menu theme, splash uses cream.
+- Bottom inset and Android navigation bar use light mint instead of blank white.
+- Contrast enforcement disabled where supported to prevent forced translucent scrims.
+- APK/device validation still required.

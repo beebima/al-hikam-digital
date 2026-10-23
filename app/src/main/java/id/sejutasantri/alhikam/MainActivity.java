@@ -10,11 +10,19 @@ import android.webkit.*;
 public class MainActivity extends Activity {
  private WebView web;
  private android.widget.FrameLayout frameForSystemBars;
+ private View statusBarBacking;
+ private View bottomBarBacking;
+ private int activeStatusColor=Color.rgb(250,246,238);
+ private static final int BOTTOM_COLOR=Color.rgb(234,247,240);
  private static final int NOTIFICATION_REQUEST=19;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
   getWindow().setStatusBarColor(Color.rgb(250,246,238));
-  getWindow().setNavigationBarColor(Color.rgb(22,65,53));
+  getWindow().setNavigationBarColor(BOTTOM_COLOR);
+  if(Build.VERSION.SDK_INT>=29){
+   getWindow().setStatusBarContrastEnforced(false);
+   getWindow().setNavigationBarContrastEnforced(false);
+  }
   getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
   web=new WebView(this);
   web.setBackgroundColor(Color.rgb(250,246,238));
@@ -37,12 +45,15 @@ public class MainActivity extends Activity {
         try{
           if(hex==null || !hex.matches("#[0-9a-fA-F]{6}"))return;
           int color=Color.parseColor(hex);
+          activeStatusColor=color;
           getWindow().setStatusBarColor(color);
+          if(statusBarBacking!=null)statusBarBacking.setBackgroundColor(color);
           int flags=getWindow().getDecorView().getSystemUiVisibility();
           if(splash)flags|=View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
           else flags&=~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+          flags|=View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
           getWindow().getDecorView().setSystemUiVisibility(flags);
-          if(frameForSystemBars!=null)frameForSystemBars.setBackgroundColor(color);
+          if(frameForSystemBars!=null)frameForSystemBars.setBackgroundColor(BOTTOM_COLOR);
         }catch(Exception ignored){}
       });
     }
@@ -55,24 +66,42 @@ public class MainActivity extends Activity {
     });
    }
   },"AlHikamAndroid");
-  // Explicitly respect Android status/navigation system bars, including Android 15 edge-to-edge.
+  // Android 15 enforces edge-to-edge for targetSdk 35.
+  // Paint separate inset surfaces; never leave transparent/white strips.
   android.widget.FrameLayout frame=new android.widget.FrameLayout(this);
-  frame.setBackgroundColor(Color.rgb(250,246,238));
+  frame.setBackgroundColor(BOTTOM_COLOR);
   frameForSystemBars=frame;
   frame.addView(web,new android.widget.FrameLayout.LayoutParams(-1,-1));
+  statusBarBacking=new View(this);
+  statusBarBacking.setBackgroundColor(activeStatusColor);
+  frame.addView(statusBarBacking,new android.widget.FrameLayout.LayoutParams(-1,0,Gravity.TOP));
+  bottomBarBacking=new View(this);
+  bottomBarBacking.setBackgroundColor(BOTTOM_COLOR);
+  frame.addView(bottomBarBacking,new android.widget.FrameLayout.LayoutParams(-1,0,Gravity.BOTTOM));
   frame.setOnApplyWindowInsetsListener((view,insets)->{
-   android.graphics.Insets bars;
-   if(Build.VERSION.SDK_INT>=30){
-    bars=insets.getInsets(WindowInsets.Type.statusBars()|WindowInsets.Type.navigationBars()|WindowInsets.Type.displayCutout());
-    view.setPadding(bars.left,bars.top,bars.right,bars.bottom);
-    // Keep the view backing synchronized with the active system-bar color.
-    view.setBackgroundColor(getWindow().getStatusBarColor());
-   }else{
-    view.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());
-   }
-   return insets;
+    int top,left,right,bottom;
+    if(Build.VERSION.SDK_INT>=30){
+      android.graphics.Insets st=insets.getInsets(WindowInsets.Type.statusBars()|WindowInsets.Type.displayCutout());
+      android.graphics.Insets nav=insets.getInsets(WindowInsets.Type.navigationBars());
+      top=st.top;left=Math.max(st.left,nav.left);right=Math.max(st.right,nav.right);bottom=nav.bottom;
+    }else{
+      top=insets.getSystemWindowInsetTop();bottom=insets.getSystemWindowInsetBottom();
+      left=insets.getSystemWindowInsetLeft();right=insets.getSystemWindowInsetRight();
+    }
+    android.widget.FrameLayout.LayoutParams page=(android.widget.FrameLayout.LayoutParams)web.getLayoutParams();
+    page.setMargins(left,top,right,bottom);
+    web.setLayoutParams(page);
+    android.widget.FrameLayout.LayoutParams status=(android.widget.FrameLayout.LayoutParams)statusBarBacking.getLayoutParams();
+    status.height=top;statusBarBacking.setLayoutParams(status);
+    android.widget.FrameLayout.LayoutParams nav=(android.widget.FrameLayout.LayoutParams)bottomBarBacking.getLayoutParams();
+    nav.height=bottom;bottomBarBacking.setLayoutParams(nav);
+    return insets;
   });
   setContentView(frame);
+  if(Build.VERSION.SDK_INT>=26){
+    getWindow().getDecorView().setSystemUiVisibility(
+      View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+  }
   web.loadUrl("file:///android_asset/index.html");
   if(Build.VERSION.SDK_INT<33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)
    ReminderScheduler.schedule(this);
