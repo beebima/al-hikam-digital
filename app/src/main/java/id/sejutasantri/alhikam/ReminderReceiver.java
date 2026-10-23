@@ -43,7 +43,7 @@ public class ReminderReceiver extends android.content.BroadcastReceiver {
        NotificationChannel nc=new NotificationChannel(channel,"Pengingat Belajar Al-Hikam",NotificationManager.IMPORTANCE_DEFAULT);
        nm.createNotificationChannel(nc);
      }
-     Intent launch=new Intent(c,MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+     Intent launch=new Intent(c,ComposeMainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
      int flags=PendingIntent.FLAG_UPDATE_CURRENT;
      if(Build.VERSION.SDK_INT>=23)flags|=PendingIntent.FLAG_IMMUTABLE;
      PendingIntent tap=PendingIntent.getActivity(c,code,launch,flags);

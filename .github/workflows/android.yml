@@ -48,6 +48,16 @@ jobs:
           rm -f app/src/main/java/id/sejutasantri/alhikam/MainActivity.kt
           test -f app/src/main/java/id/sejutasantri/alhikam/ComposeMainActivity.kt
 
+      - name: Verify native Activity references
+        shell: bash
+        run: |
+          if grep -R -nE 'MainActivity\.class|class MainActivity([[:space:]:]|$)' app/src/main/java; then
+            echo "ERROR: Legacy MainActivity reference remains"
+            exit 1
+          fi
+          grep -n 'ComposeMainActivity' app/src/main/AndroidManifest.xml
+          grep -n 'ComposeMainActivity.class' app/src/main/java/id/sejutasantri/alhikam/ReminderReceiver.java
+
       - name: Build debug APK
         run: gradle --no-daemon :app:assembleDebug
 

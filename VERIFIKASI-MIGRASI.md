@@ -29,3 +29,9 @@
 - Mengoreksi callback Billing 7.1.1: parameter kedua `queryProductDetailsAsync` merupakan `List<ProductDetails>`, sehingga gunakan `products.firstOrNull()` dan bukan `products.productDetailsList.firstOrNull()`.
 - Memastikan hanya `MainActivity.kt` yang mendeklarasikan `MainActivity` dalam paket utama.
 - Belum dilakukan kompilasi lokal; verifikasi berikutnya melalui GitHub Actions.
+
+
+## Hotfix 3 (kompilasi Java)
+- `ReminderReceiver.java` kini menggunakan `ComposeMainActivity.class`, bukan `MainActivity.class`.
+- Workflow memeriksa referensi Activity lama sebelum menjalankan build.
+- Build APK belum diuji lokal; verifikasi akhir dilakukan oleh GitHub Actions.
