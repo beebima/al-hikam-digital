@@ -13,12 +13,13 @@ public class MainActivity extends Activity {
  private View statusBarBacking;
  private View bottomBarBacking;
  private int activeStatusColor=Color.rgb(250,246,238);
+ private int bottomInsetPx=0;
  private static final int BOTTOM_COLOR=Color.rgb(48,70,52);
  private static final int NOTIFICATION_REQUEST=19;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
   getWindow().setStatusBarColor(Color.rgb(250,246,238));
-  getWindow().setNavigationBarColor(BOTTOM_COLOR);
+  getWindow().setNavigationBarColor(Color.TRANSPARENT);
   if(Build.VERSION.SDK_INT>=29){
    getWindow().setStatusBarContrastEnforced(false);
    getWindow().setNavigationBarContrastEnforced(false);
@@ -36,7 +37,7 @@ public class MainActivity extends Activity {
   web.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
   web.setWebViewClient(new WebViewClient(){
     @Override public void onPageFinished(WebView v,String url){
-      v.evaluateJavascript("document.documentElement.classList.add('android-native')",null);
+      v.evaluateJavascript("document.documentElement.classList.add('android-native');document.documentElement.style.setProperty('--android-bottom-inset','"+bottomInsetPx+"px')",null);
     }
   });
   web.addJavascriptInterface(new Object(){
@@ -46,7 +47,7 @@ public class MainActivity extends Activity {
          if(hex==null || !hex.matches("#[0-9a-fA-F]{6}"))return;
          int c=Color.parseColor(hex);
          if(bottomBarBacking!=null)bottomBarBacking.setBackgroundColor(c);
-         getWindow().setNavigationBarColor(c);
+         getWindow().setNavigationBarColor(Color.TRANSPARENT);
        }catch(Exception ignored){}
      });
    }
@@ -103,7 +104,7 @@ public class MainActivity extends Activity {
     // Let the WebView extend to the bottom edge, including the system navigation inset.
     // The HTML banner adds safe padding for gesture/buttons and the nav follows it.
     page.setMargins(left,top,right,0);
-    final int bottomInsetPx=bottom;
+    bottomInsetPx=bottom;
     web.post(()->web.evaluateJavascript(
       "document.documentElement.style.setProperty('--android-bottom-inset', '"+bottomInsetPx+"px')",null));
     web.setLayoutParams(page);

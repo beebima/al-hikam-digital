@@ -78,3 +78,11 @@ Compact Last Opened card between Progress/Tutorial and Ad-Free. Shows saved last
 - Android navigation backing color is synchronized to the exact menu palette color through native bridge.
 - Navigation gesture area is a separate system area, not an oversized app menu.
 - Device visual test still required.
+
+## V1.0.3 navigation flush fix
+- Corrected root cause: sticky menu was placed ABOVE Android bottom inset, leaving a white gap.
+- Sticky menu now uses bottom:0 and includes bottom inset inside its own background, not outside it.
+- Removed duplicate bottom spacing; retained accessible buttons.
+- Android navigation system bar is transparent; native backing and menu use the same Forest Sage color.
+- Insets are reapplied after WebView page finishes loading to avoid initialization timing issues.
+- Bottom ad banner remains removed. Verify on emulator/device.
