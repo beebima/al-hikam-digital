@@ -23,3 +23,9 @@
 5. Ganti ID iklan uji dengan unit produksi hanya saat siap publish dan sesuai kebijakan AdMob.
 6. Fitur dan tampilan WebView lama belum diaudit tuntas satu per satu: tidak ada klaim 100% parity. Pengingat lama tetap melalui kelas Java yang dipertahankan; layar pengaturan pengingat Compose belum dibuat.
 7. Penyimpanan WebView localStorage lama tidak otomatis bermigrasi ke SharedPreferences Compose.
+
+
+## Hotfix kompilasi GitHub Actions (24 Oktober 2026)
+- Mengoreksi callback Billing 7.1.1: parameter kedua `queryProductDetailsAsync` merupakan `List<ProductDetails>`, sehingga gunakan `products.firstOrNull()` dan bukan `products.productDetailsList.firstOrNull()`.
+- Memastikan hanya `MainActivity.kt` yang mendeklarasikan `MainActivity` dalam paket utama.
+- Belum dilakukan kompilasi lokal; verifikasi berikutnya melalui GitHub Actions.
