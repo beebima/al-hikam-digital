@@ -25,3 +25,10 @@ Full Android Studio Gradle project (not just index.html).
 - App does not access external servers or require INTERNET permission in this build.
 - Android 15 edge-to-edge layout, back-navigation, accessibility and store policy compliance should be tested on real devices.
 - Package name `id.sejutasantri.alhikam` is a proposed identifier; confirm before Play Store's first upload.
+
+
+## GitHub Actions — automatic APK build
+
+The repository now includes `.github/workflows/android.yml`. Upload **all files and hidden directories** to the repository root, not into a nested folder. On pushes to `main` or `master`, GitHub Actions builds a **debug APK**. You can also use Actions > Build Al-Hikam Android APK > Run workflow. After the run succeeds, download the `AlHikamDigital-V1.1.1-debug-apk` artifact.
+
+This debug APK is for device testing, **not** a Play Store release AAB. Publishing requires signing and a separate release workflow. GitHub Actions must be enabled in repository settings.
