@@ -20,6 +20,104 @@ import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 public class MainActivity extends Activity {
  private WebView web;
+ // Experimental native-scroll reader: HTML fragments and native AdViews are siblings
+ // of one Android ScrollView, never floating overlays tracking DOM coordinates.
+ private android.widget.FrameLayout nativeReaderLayer;
+ private android.widget.ScrollView nativeReaderScroll;
+ private final java.util.ArrayList<WebView> readerFragments=new java.util.ArrayList<>();
+ private final java.util.ArrayList<AdView> readerAds=new java.util.ArrayList<>();
+ private boolean readerOpen=false;
+ private void closeNativeReader(){
+   if(nativeReaderLayer==null)return;
+   for(WebView v:readerFragments){v.stopLoading();v.destroy();}
+   readerFragments.clear();
+   for(AdView ad:readerAds)ad.destroy();
+   readerAds.clear();
+   if(frameForSystemBars!=null)frameForSystemBars.removeView(nativeReaderLayer);
+   nativeReaderLayer=null;nativeReaderScroll=null;readerOpen=false;
+ }
+ private void showNativeReader(String payload){
+   if(isFinishing()||frameForSystemBars==null)return;
+   try{
+     org.json.JSONObject obj=new org.json.JSONObject(payload);
+     org.json.JSONArray parts=obj.optJSONArray("parts");
+     if(parts==null || parts.length()==0 || parts.length()>40)return;
+     closeNativeReader();
+     readerOpen=true;
+     nativeReaderLayer=new FrameLayout(this);
+     nativeReaderLayer.setBackgroundColor(Color.rgb(250,246,238));
+     android.widget.LinearLayout vertical=new android.widget.LinearLayout(this);
+     vertical.setOrientation(android.widget.LinearLayout.VERTICAL);
+     android.widget.LinearLayout toolbar=new android.widget.LinearLayout(this);
+     toolbar.setGravity(Gravity.CENTER_VERTICAL);
+     toolbar.setBackgroundColor(Color.rgb(48,70,52));
+     android.widget.TextView back=new android.widget.TextView(this);
+     back.setText("‹  Kembali ke Al-Hikam");back.setTextColor(Color.WHITE);
+     back.setTextSize(16);back.setPadding(dp(18),dp(13),dp(18),dp(13));
+     back.setOnClickListener(v->closeNativeReader());toolbar.addView(back);
+     vertical.addView(toolbar,new android.widget.LinearLayout.LayoutParams(-1,-2));
+     nativeReaderScroll=new android.widget.ScrollView(this);
+     nativeReaderScroll.setFillViewport(true);
+     nativeReaderScroll.setBackgroundColor(Color.rgb(250,246,238));
+     android.widget.LinearLayout column=new android.widget.LinearLayout(this);
+     column.setOrientation(android.widget.LinearLayout.VERTICAL);
+     nativeReaderScroll.addView(column);
+     vertical.addView(nativeReaderScroll,new android.widget.LinearLayout.LayoutParams(-1,0,1));
+     nativeReaderLayer.addView(vertical,new FrameLayout.LayoutParams(-1,-1));
+     android.widget.FrameLayout.LayoutParams layerParams=new FrameLayout.LayoutParams(-1,-1);
+     layerParams.topMargin=getStatusInset();layerParams.bottomMargin=bottomInsetPx;
+     frameForSystemBars.addView(nativeReaderLayer,layerParams);
+     String style=obj.optString("css","");
+     String base="<meta name='viewport' content='width=device-width, initial-scale=1'>"+
+       "<style>html,body{margin:0!important;padding:0!important;background:#faf6ee!important;overflow:hidden!important;}"+
+       "button,[data-open],.no-ads-card{display:none!important;}"+style+"</style>";
+     for(int i=0;i<parts.length();i++){
+       org.json.JSONObject part=parts.optJSONObject(i);if(part==null)continue;
+       if("ad".equals(part.optString("type"))){
+         android.widget.FrameLayout wrap=new FrameLayout(this);
+         column.addView(wrap,new android.widget.LinearLayout.LayoutParams(-1,-2));
+         if(!isAdsFreeVerified()){
+           int width=Math.max(1,deviceBannerWidthDp());
+           AdSize size=AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(this,width);
+           AdView ad=new AdView(this);ad.setAdUnitId(TEST_BANNER_ID);ad.setAdSize(size);
+           wrap.setVisibility(View.GONE);
+           wrap.addView(ad,new FrameLayout.LayoutParams(-2,-2,Gravity.CENTER));
+           ad.setAdListener(new AdListener(){
+             @Override public void onAdLoaded(){wrap.setVisibility(View.VISIBLE);}
+             @Override public void onAdFailedToLoad(LoadAdError error){wrap.setVisibility(View.GONE);}
+           });
+           readerAds.add(ad);ad.loadAd(new AdRequest.Builder().build());
+         }
+       }else if("html".equals(part.optString("type"))){
+         String html=part.optString("html","");if(html.trim().isEmpty())continue;
+         WebView fragment=new WebView(this);
+         fragment.setBackgroundColor(Color.rgb(250,246,238));
+         fragment.setVerticalScrollBarEnabled(false);fragment.setHorizontalScrollBarEnabled(false);
+         fragment.getSettings().setJavaScriptEnabled(true);
+         fragment.getSettings().setDefaultTextEncodingName("UTF-8");
+         fragment.setOnTouchListener((v,e)->false);
+         android.widget.LinearLayout.LayoutParams flp=new android.widget.LinearLayout.LayoutParams(-1,dp(100));
+         column.addView(fragment,flp);readerFragments.add(fragment);
+         fragment.setWebViewClient(new WebViewClient(){
+           @Override public void onPageFinished(WebView view,String url){
+             view.evaluateJavascript("(function(){return Math.ceil(Math.max(document.body.scrollHeight,document.documentElement.scrollHeight))})()",value->{
+               try{int height=Integer.parseInt(value.replace("\"",""));
+                 android.widget.LinearLayout.LayoutParams lp=(android.widget.LinearLayout.LayoutParams)view.getLayoutParams();
+                 lp.height=Math.max(dp(30),Math.round(height*getResources().getDisplayMetrics().density));
+                 view.setLayoutParams(lp);
+               }catch(Exception ignored){}
+             });
+           }
+         });
+         fragment.loadDataWithBaseURL("file:///android_asset/",base+"<main id='content'>"+html+"</main>","text/html","UTF-8",null);
+       }
+     }
+   }catch(Exception error){closeNativeReader();android.util.Log.e("AlHikamReader","Native reader failed",error);}
+ }
+ private boolean isAdsFreeVerified(){return false;} // Replace with verified Billing entitlement in Step 7.
+ private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}
+ private int getStatusInset(){int id=getResources().getIdentifier("status_bar_height","dimen","android");return id>0?getResources().getDimensionPixelSize(id):dp(24);}
+
  private FrameLayout adsOverlay;
  private AdView bottomBanner;
  private boolean bottomBannerLoaded=false;
@@ -193,7 +291,9 @@ public class MainActivity extends Activity {
   web.addJavascriptInterface(new Object(){
    // V1.1.1: read-only entitlement contract. Must be replaced ONLY after integrating
    // Google Play Billing verified purchases; no JS method is allowed to set it.
-   @JavascriptInterface public boolean isAdsFree(){return false;}
+   @JavascriptInterface public boolean isAdsFree(){return isAdsFreeVerified();}
+   @JavascriptInterface public void openNativeReader(String json){runOnUiThread(()->showNativeReader(json));}
+   @JavascriptInterface public void closeNativeReader(){runOnUiThread(()->MainActivity.this.closeNativeReader());}
    @JavascriptInterface public void positionBottomBanner(double l,double t,double w,double h){
      runOnUiThread(()->updateBannerPosition((float)l,(float)t,(float)w,(float)h));
    }
@@ -298,8 +398,8 @@ public class MainActivity extends Activity {
   if(req==NOTIFICATION_REQUEST && results.length>0 && results[0]==PackageManager.PERMISSION_GRANTED)
    ReminderScheduler.schedule(this);
  }
- @Override protected void onPause(){if(bottomBanner!=null)bottomBanner.pause();for(AdView v:inlineBanners.values())v.pause();super.onPause();}
- @Override protected void onResume(){super.onResume();if(bottomBanner!=null)bottomBanner.resume();for(AdView v:inlineBanners.values())v.resume();}
- @Override protected void onDestroy(){for(String key:new java.util.ArrayList<>(inlineBanners.keySet()))removeInlineBanner(key);if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
- @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
+ @Override protected void onPause(){for(AdView v:readerAds)v.pause();if(bottomBanner!=null)bottomBanner.pause();for(AdView v:inlineBanners.values())v.pause();super.onPause();}
+ @Override protected void onResume(){super.onResume();for(AdView v:readerAds)v.resume();if(bottomBanner!=null)bottomBanner.resume();for(AdView v:inlineBanners.values())v.resume();}
+ @Override protected void onDestroy(){closeNativeReader();for(String key:new java.util.ArrayList<>(inlineBanners.keySet()))removeInlineBanner(key);if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
+ @Override public void onBackPressed(){if(readerOpen){closeNativeReader();return;}if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }

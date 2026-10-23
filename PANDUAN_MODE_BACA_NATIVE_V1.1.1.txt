@@ -1,0 +1,29 @@
+AL-HIKAM DIGITAL v1.1.1 — STEP 7A: PROTOTIPE PEMBACA NATIVE-SCROLL
+
+TUJUAN
+Menguji cara menghilangkan lag iklan yang berasal dari overlay AdMob di atas WebView yang digulir.
+
+IMPLEMENTASI
+- Tambahan tombol 'Mode Baca Mulus (Uji)' pada aplikasi Android.
+- Saat ditekan, isi layar saat itu disalin menjadi bagian-bagian HTML, dipisahkan di posisi slot iklan.
+- Android menampilkan bagian HTML dan AdView native sebagai sibling pada satu Android ScrollView.
+- Slot iklan menggunakan ID banner TEST resmi Google dan format Inline Adaptive.
+- Saat gagal dimuat, wadah iklan disembunyikan dan tidak menyisakan ruang.
+- Tombol 'Kembali ke Al-Hikam' mengembalikan pembaca semula tanpa kehilangan posisi.
+- Mode asal tidak dihapus untuk memudahkan perbandingan.
+
+PENTING
+- Ini mode uji arsitektur yang belum layak menjadi pembaca default. Navigasi dan interaksi di dalam snapshot tidak setara dengan pembaca asli. Kembali ke pembaca asal untuk Next/Back, pengaturan, bookmark, dan interaksi lain.
+- Tampilan fragment WebView serta performanya perlu diuji di HP; build hijau belum cukup.
+- Secara sengaja belum mengaktifkan pembelian premium. Status billing masih placeholder.
+- Belum diuji build/HP di lingkungan pembuat ZIP.
+
+TES
+1. Upload seluruh isi ZIP ke repo GitHub yang sama dan cek Actions.
+2. Install APK hasil build.
+3. Buka Al-Hikam bab panjang, tekan 'Mode Baca Mulus (Uji)'.
+4. Scroll cepat & lambat, periksa iklan bergerak satu scroll dengan teks, tanpa melayang.
+5. Tes kembali ke pembaca asal; bandingkan tampilannya.
+6. Kirim screenshot jika build gagal atau ada pemotongan konten/layout.
+
+Seluruh isi source tetap versionName 1.1.1.

@@ -1,0 +1,7 @@
+Al-Hikam Digital v1.1.1 — Step 6 Revisi Favorit
+
+- Tambahkan slot banner kedua pada tab Favorit di bawah blok Bookmark dan di atas Pengaturan Data.
+- Slot pertama di antara Hikmah Tersimpan dan Ruang Belajarku tetap dipertahankan.
+- Hapus teks lawas “Tidak ada iklan atau pembelian dalam aplikasi HTML ini” (termasuk terjemahan Inggrisnya).
+- Slot banner baru menggunakan mekanisme native-inline AdMob test SDK yang sama dengan slot Step 6 lainnya; slot collapse jika tidak tersedia/premium.
+- Google Play Billing masih belum diintegrasikan untuk transaksi riil.
