@@ -40,6 +40,19 @@ public class MainActivity extends Activity {
     }
   });
   web.addJavascriptInterface(new Object(){
+   @JavascriptInterface public void setBottomBarColor(String rgb){
+     runOnUiThread(()->{
+       try{
+         if(rgb==null || !(rgb.startsWith("rgb(") || rgb.startsWith("rgba(")))return;
+         String[] p=rgb.substring(rgb.indexOf('(')+1,rgb.indexOf(')')).split(",");
+         int c=Color.rgb(Integer.parseInt(p[0].trim()),Integer.parseInt(p[1].trim()),Integer.parseInt(p[2].trim()));
+         if(bottomBarBacking!=null)bottomBarBacking.setBackgroundColor(c);
+         if(frameForSystemBars!=null)frameForSystemBars.setBackgroundColor(c);
+         getWindow().setNavigationBarColor(c);
+       }catch(Exception ignored){}
+     });
+   }
+
    @JavascriptInterface public void setSystemBarColor(String hex,boolean splash){
       runOnUiThread(()->{
         try{

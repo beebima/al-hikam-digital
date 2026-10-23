@@ -54,3 +54,11 @@ Requires emulator testing across gesture and three-button navigation modes.
 
 ## Last opened chapter (V1.0.3)
 Compact Last Opened card between Progress/Tutorial and Ad-Free. Shows saved lastRead chapter number and localized title, and Open button returns to that chapter. Button disabled until a chapter has been opened. No change to app version.
+
+## Corrected fixed banner and Android system navigation
+- Banner height is strictly 64 CSS px, including its padding; never expands with navigation inset.
+- App bottom menu is anchored immediately above the banner.
+- WebView extends to device bottom edge; banner sits directly above system navigation inset.
+- Native system navigation area uses the same computed background color as the banner, eliminating a white stripe.
+- The native navigation area is not counted as advertising space.
+- Device test required for Android 15 gesture and three-button navigation.

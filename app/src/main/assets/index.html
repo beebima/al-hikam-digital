@@ -466,20 +466,19 @@ html.android-native .learning-circle-card{padding:12px!important}
 .tutorial-compact-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--line);font-size:22px;color:var(--accent)}
 @media(max-width:370px){.home-progress-grid{grid-template-columns:minmax(0,3fr) minmax(65px,1fr);gap:6px}.home-progress-grid .learning-circle-chart{width:60px!important;height:60px!important;flex-basis:60px!important}.home-progress-grid .learning-circle-layout{gap:5px!important}.home-progress-grid .learning-circle-info>strong{font-size:10px!important}.home-progress-grid #resume{font-size:9px!important}}
 
-/* Android V1.0.3: place both fixed bottom bars lower, occupying the full WebView.
-   The banner remains the same 64px content slot; system inset is safety padding,
-   not additional ad inventory. */
+/* V1.0.3 corrected: fixed-size ad slot, never enlarged by Android insets.
+   System navigation area is a separate same-color surface, not ad inventory. */
 html.android-native .mock-ad{
   box-sizing:border-box!important;
-  height:calc(var(--mock-ad-height,64px) + var(--android-bottom-inset,0px))!important;
-  min-height:0!important;
-  padding:7px 12px calc(7px + var(--android-bottom-inset,0px))!important;
-  bottom:0!important;
+  height:64px!important;
+  min-height:64px!important;
+  max-height:64px!important;
+  padding:7px 12px!important;
+  bottom:var(--android-bottom-inset,0px)!important;
 }
 html.android-native .nav{
-  bottom:calc(var(--mock-ad-height,64px) + var(--android-bottom-inset,0px))!important;
+  bottom:calc(64px + var(--android-bottom-inset,0px))!important;
 }
-
 /* Compact last-opened chapter strip above the Ad-Free offer. */
 .last-opened-card{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;min-height:64px!important;padding:10px 12px!important;margin:8px 0!important}
 .last-opened-details{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
@@ -1103,6 +1102,11 @@ const legacyThemeMap={ottoman:'royal',zamrud:'emerald',safir:'ocean',delima:'sun
 function syncAndroidSystemBars(color,isSplash){
  try{if(window.AlHikamAndroid&&typeof window.AlHikamAndroid.setSystemBarColor==='function')
    window.AlHikamAndroid.setSystemBarColor(isSplash?'#FAF6EE':color,!!isSplash);
+   if(window.AlHikamAndroid&&typeof window.AlHikamAndroid.setBottomBarColor==='function'){
+     const ad=document.querySelector('.mock-ad');
+     const bg=ad?getComputedStyle(ad).backgroundColor:'rgb(237,242,230)';
+     window.AlHikamAndroid.setBottomBarColor(bg);
+   }
  }catch(e){}
 }
 function applyColorTheme(){document.documentElement.dataset.colorTheme=state.colorTheme;document.documentElement.dataset.mode=state.theme;const theme=colorThemes.find(t=>t.id===state.colorTheme)||colorThemes[0];const colors=state.theme==='dark'?theme.dark:theme.light;const navBg=theme.light.ink;const navFg='#FFF9EA';for(const node of [document.documentElement,document.body]){node.style.setProperty('--royal-chrome-bg',navBg);node.style.setProperty('--royal-chrome-fg',navFg);node.style.setProperty('--royal-chrome-highlight',theme.light.gold);}document.documentElement.style.setProperty('--glow-a',theme.glow[0]);document.documentElement.style.setProperty('--glow-b',theme.glow[1]);for(const [key,value] of Object.entries(colors)){document.documentElement.style.setProperty('--'+key,value);document.body.style.setProperty('--'+key,value);}document.documentElement.style.setProperty('--on-accent', state.theme==='dark'?'#18212A':'#FFFFFF');document.body.style.setProperty('--on-accent',state.theme==='dark'?'#18212A':'#FFFFFF');document.documentElement.style.setProperty('--theme-nav-active',state.theme==='dark'?theme.dark.line:theme.light.line);document.body.style.setProperty('--theme-nav-active',state.theme==='dark'?theme.dark.line:theme.light.line);document.documentElement.style.setProperty('--theme-soft',state.theme==='dark'?theme.dark.paper:theme.light.bg);document.body.style.setProperty('--theme-soft',state.theme==='dark'?theme.dark.paper:theme.light.bg);applySkylinePalette(theme,state.theme);document.querySelector('meta[name="theme-color"]').content=colors.bg;if(!document.getElementById('splash'))syncAndroidSystemBars(navBg,false);}
