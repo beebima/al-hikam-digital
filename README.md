@@ -70,3 +70,11 @@ Compact Last Opened card between Progress/Tutorial and Ad-Free. Shows saved last
 - No extra ad placeholder or white gap below the bottom menu.
 - Header, Last Opened, progress/tutorial and other features preserved.
 - Requires APK device testing; Android 15 inset handling may vary by navigation mode.
+
+## Compact navigation color alignment
+- Bottom ad banner remains removed.
+- Fixed menu uses bottom offset equal to Android navigation inset; no double inset padding.
+- Reduced bottom menu vertical padding to 3px, icon buttons 48px minimum.
+- Android navigation backing color is synchronized to the exact menu palette color through native bridge.
+- Navigation gesture area is a separate system area, not an oversized app menu.
+- Device visual test still required.

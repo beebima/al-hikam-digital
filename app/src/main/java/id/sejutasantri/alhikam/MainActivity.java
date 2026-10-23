@@ -13,12 +13,12 @@ public class MainActivity extends Activity {
  private View statusBarBacking;
  private View bottomBarBacking;
  private int activeStatusColor=Color.rgb(250,246,238);
- private static final int BOTTOM_COLOR=Color.rgb(42,83,66);
+ private static final int BOTTOM_COLOR=Color.rgb(48,70,52);
  private static final int NOTIFICATION_REQUEST=19;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
   getWindow().setStatusBarColor(Color.rgb(250,246,238));
-  getWindow().setNavigationBarColor(Color.TRANSPARENT);
+  getWindow().setNavigationBarColor(BOTTOM_COLOR);
   if(Build.VERSION.SDK_INT>=29){
    getWindow().setStatusBarContrastEnforced(false);
    getWindow().setNavigationBarContrastEnforced(false);
@@ -40,15 +40,13 @@ public class MainActivity extends Activity {
     }
   });
   web.addJavascriptInterface(new Object(){
-   @JavascriptInterface public void setBottomBarColor(String rgb){
+   @JavascriptInterface public void setBottomBarColor(String hex){
      runOnUiThread(()->{
        try{
-         if(rgb==null || !(rgb.startsWith("rgb(") || rgb.startsWith("rgba(")))return;
-         String[] p=rgb.substring(rgb.indexOf('(')+1,rgb.indexOf(')')).split(",");
-         int c=Color.rgb(Integer.parseInt(p[0].trim()),Integer.parseInt(p[1].trim()),Integer.parseInt(p[2].trim()));
+         if(hex==null || !hex.matches("#[0-9a-fA-F]{6}"))return;
+         int c=Color.parseColor(hex);
          if(bottomBarBacking!=null)bottomBarBacking.setBackgroundColor(c);
-         if(frameForSystemBars!=null)frameForSystemBars.setBackgroundColor(c);
-         getWindow().setNavigationBarColor(Color.TRANSPARENT);
+         getWindow().setNavigationBarColor(c);
        }catch(Exception ignored){}
      });
    }
@@ -64,7 +62,7 @@ public class MainActivity extends Activity {
           int flags=getWindow().getDecorView().getSystemUiVisibility();
           if(splash)flags|=View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
           else flags&=~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-          flags|=View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+          flags&=~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
           getWindow().getDecorView().setSystemUiVisibility(flags);
           if(frameForSystemBars!=null)frameForSystemBars.setBackgroundColor(BOTTOM_COLOR);
         }catch(Exception ignored){}
@@ -118,7 +116,7 @@ public class MainActivity extends Activity {
   setContentView(frame);
   if(Build.VERSION.SDK_INT>=26){
     getWindow().getDecorView().setSystemUiVisibility(
-      View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+      View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
   }
   web.loadUrl("file:///android_asset/index.html");
   if(Build.VERSION.SDK_INT<33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)
