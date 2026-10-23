@@ -35,3 +35,7 @@
 - `ReminderReceiver.java` kini menggunakan `ComposeMainActivity.class`, bukan `MainActivity.class`.
 - Workflow memeriksa referensi Activity lama sebelum menjalankan build.
 - Build APK belum diuji lokal; verifikasi akhir dilakukan oleh GitHub Actions.
+
+
+## Hotfix 4 — GitHub Actions false positive
+Pola pemeriksaan kelas lama sekarang mensyaratkan batas identifier sebelum `MainActivity.class`, sehingga `ComposeMainActivity.class` tidak salah terdeteksi. Belum diuji kompilasi APK secara lokal.

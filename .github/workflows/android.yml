@@ -51,7 +51,7 @@ jobs:
       - name: Verify native Activity references
         shell: bash
         run: |
-          if grep -R -nE 'MainActivity\.class|class MainActivity([[:space:]:]|$)' app/src/main/java; then
+          if grep -R -nE '(^|[^[:alnum:]_])MainActivity\.class|class[[:space:]]+MainActivity([[:space:]:]|$)' app/src/main/java; then
             echo "ERROR: Legacy MainActivity reference remains"
             exit 1
           fi
