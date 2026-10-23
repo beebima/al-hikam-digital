@@ -92,3 +92,6 @@ Compact Last Opened card between Progress/Tutorial and Ad-Free. Shows saved last
 - Navigation backing is drawn behind the WebView, no longer on top of the menu.
 - One controlled gesture-safe inset with reduced dead space; same #304634 color.
 - No bottom ad banner. APK/device testing required.
+
+## Bottom menu compact follow-up
+Removed the duplicate inline Android navigation override and placed a single final rule at the end of the main stylesheet. The menu now uses a fixed 12px lower cushion rather than expanding with the full Android inset. This lowers menu buttons within the green region, keeping the native gesture bar on a matching background. The HTML bottom ad stays removed. Visual APK test still needed.
