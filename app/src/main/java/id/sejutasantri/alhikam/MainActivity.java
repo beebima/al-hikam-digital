@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
   frame.addView(statusBarBacking,new android.widget.FrameLayout.LayoutParams(-1,0,Gravity.TOP));
   bottomBarBacking=new View(this);
   bottomBarBacking.setBackgroundColor(BOTTOM_COLOR);
-  frame.addView(bottomBarBacking,new android.widget.FrameLayout.LayoutParams(-1,0,Gravity.BOTTOM));
+  frame.addView(bottomBarBacking,0,new android.widget.FrameLayout.LayoutParams(-1,0,Gravity.BOTTOM));
   frame.setOnApplyWindowInsetsListener((view,insets)->{
     int top,left,right,bottom;
     if(Build.VERSION.SDK_INT>=30){

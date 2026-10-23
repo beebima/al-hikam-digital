@@ -86,3 +86,9 @@ Compact Last Opened card between Progress/Tutorial and Ad-Free. Shows saved last
 - Android navigation system bar is transparent; native backing and menu use the same Forest Sage color.
 - Insets are reapplied after WebView page finishes loading to avoid initialization timing issues.
 - Bottom ad banner remains removed. Verify on emulator/device.
+
+## Navigation inset rebuild
+- Removed conflicting duplicate Android bottom navigation styles.
+- Navigation backing is drawn behind the WebView, no longer on top of the menu.
+- One controlled gesture-safe inset with reduced dead space; same #304634 color.
+- No bottom ad banner. APK/device testing required.

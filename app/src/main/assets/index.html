@@ -717,38 +717,11 @@ html.android-native .nav,html.android-native body .nav,html.android-native body.
  background:var(--royal-chrome-bg)!important;
 }
 html.android-native .shell{padding-bottom:calc(58px + var(--android-bottom-inset,0px))!important}
-</style></head><body><style>
-/* Final Android bottom layout: no banner; nav meets the gesture navigation area. */
-html.android-native .mock-ad{display:none!important}
-html.android-native .navinner button{padding:4px 0!important;min-height:48px!important}
-html.android-native .nav .ico{line-height:1.1!important}
-html.android-native .nav,
-html.android-native body .nav,
-html.android-native body.dark .nav{
-  bottom:var(--android-bottom-inset,0px)!important;
-  padding:3px 5px!important;
-  border-radius:18px 18px 0 0!important;
-  transition:none!important;
-  transform:none!important;
-  box-shadow:none!important;
-}
-html.android-native .shell{padding-bottom:calc(68px + var(--android-bottom-inset,0px))!important}
-
-/* Android navigation: ONE bottom inset only, inside the sticky menu.
-   No external gap, no advertising space, no duplicate bottom padding. */
-html.android-native .nav,html.android-native body .nav,html.android-native body.dark .nav{
- bottom:0!important;
- padding:3px 5px calc(3px + var(--android-bottom-inset,0px))!important;
- margin:0!important;
- border-bottom:0!important;
- border-radius:18px 18px 0 0!important;
- box-shadow:none!important;
- transform:none!important;
- transition:none!important;
- background:var(--royal-chrome-bg)!important;
-}
-html.android-native .shell{padding-bottom:calc(58px + var(--android-bottom-inset,0px))!important}
-</style><script>if(window.AlHikamAndroid)document.documentElement.classList.add('android-native');</script><div class="ambient-ornaments" aria-hidden="true"><span class="orn">✧</span><span class="orn">✦</span><span class="orn">❋</span><span class="orn">✧</span><span class="orn">✦</span><span class="orn">✧</span></div><script>/* Apply saved theme before the splash is painted. */
+/* Authoritative Android nav override: one inset, no legacy duplicated paddings. */
+html.android-native .nav,html.android-native body .nav,html.android-native body.dark .nav{bottom:0!important;padding:2px 5px max(14px,calc(var(--android-bottom-inset,0px) - 6px))!important;min-height:0!important;box-shadow:none!important;transform:none!important;transition:none!important;background:#304634!important}
+html.android-native .navinner button{min-height:42px!important;padding:2px 0!important}
+html.android-native .shell{padding-bottom:calc(55px + var(--android-bottom-inset,0px))!important}
+</style></head><body><style id="android-nav-final">html.android-native .mock-ad{display:none!important}html.android-native .nav,html.android-native body .nav,html.android-native body.dark .nav{bottom:0!important;padding:2px 5px max(14px,calc(var(--android-bottom-inset,0px) - 6px))!important;min-height:0!important;box-shadow:none!important;transform:none!important;transition:none!important;background:#304634!important}html.android-native .navinner button{min-height:42px!important;padding:2px 0!important}html.android-native .shell{padding-bottom:calc(55px + var(--android-bottom-inset,0px))!important}</style><script>if(window.AlHikamAndroid)document.documentElement.classList.add('android-native');</script><div class="ambient-ornaments" aria-hidden="true"><span class="orn">✧</span><span class="orn">✦</span><span class="orn">❋</span><span class="orn">✧</span><span class="orn">✦</span><span class="orn">✧</span></div><script>/* Apply saved theme before the splash is painted. */
 try{const saved=JSON.parse(localStorage.getItem('alhikam-v02-state')||'{}');if(saved.theme==='dark')document.body.classList.add('dark')}catch(e){}
 </script><div class="splash" id="splash" aria-label="Memuat aplikasi"><div class="splash-center"><div class="splash-logo" lang="ar">الحكم</div><div class="brand">Al-Hikam Digital</div><div class="splash-line"><span></span></div><small id="loading-label">Menyiapkan ruang hikmah...</small></div><div class="splash-brand" aria-label="Sejuta Santri"><svg role="img" aria-label="Logo Sejuta Santri" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="320" height="160" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
 viewBox="2500 18650 10000 5100"
