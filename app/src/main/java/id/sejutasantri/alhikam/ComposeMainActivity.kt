@@ -15,6 +15,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +42,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 private val paper=Color(0xFFFAF6EE)
+private val cardPaper=Color(0xFFFFFDF8)
+private val muted=Color(0xFF637184)
+private val line=Color(0xFFE1E5E8)
 private val ink=Color(0xFF172C45)
 private val gold=Color(0xFFC6A36A)
 private const val TEST_BANNER="ca-app-pub-3940256099942544/6300978111"
@@ -52,6 +61,9 @@ class ComposeMainActivity:ComponentActivity(){
  private val productAvailable=mutableStateOf(false)
  private var details:ProductDetails?=null
  override fun onCreate(savedInstanceState:Bundle?){super.onCreate(savedInstanceState)
+  window.statusBarColor=android.graphics.Color.rgb(250,246,238)
+  window.navigationBarColor=android.graphics.Color.rgb(250,246,238)
+  window.decorView.systemUiVisibility=android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
   MobileAds.initialize(this){};loadInterstitial();connectBilling()
   val data=JSONArray(assets.open("hikmah.json").bufferedReader().use{it.readText()})
   val full=JSONObject(assets.open("fullHikam.json").bufferedReader().use{it.readText()})
@@ -98,8 +110,13 @@ private fun textFor(o:JSONObject,f:JSONObject?,e:JSONObject?,section:String,lang
  LaunchedEffect(selected,section,language,prompter){scroll.scrollTo(0);running=false}
  LaunchedEffect(prompter,running,speed,scroll.maxValue){while(prompter&&running&&scroll.value<scroll.maxValue){delay(32);scroll.scrollTo((scroll.value+(speed*2).toInt().coerceAtLeast(1)).coerceAtMost(scroll.maxValue))};if(scroll.value>=scroll.maxValue)running=false}
  Column(Modifier.fillMaxSize().background(bg)){
-  if(!prompter){Row(Modifier.fillMaxWidth().background(ink).padding(14.dp),verticalAlignment=Alignment.CenterVertically){Text("AL-HIKAM",color=Color.White,fontSize=21.sp,fontFamily=FontFamily.Serif,modifier=Modifier.weight(1f));Text("Ivory Manuscript",color=gold,fontSize=12.sp)}
-   Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal=4.dp)){listOf("Beranda","Daftar","Baca","Favorit","Bookmark","Pengaturan").forEach{p->TextButton(onClick={navigate(p)}){Text(p,color=fg)}}}}
+  if(!prompter){
+   Row(Modifier.fillMaxWidth().background(bg).padding(horizontal=20.dp,vertical=13.dp),verticalAlignment=Alignment.CenterVertically){
+    Column(Modifier.weight(1f)){Text("الْحِكَمُ",fontSize=27.sp,color=gold,fontFamily=FontFamily.Serif,lineHeight=32.sp);Text("AL-HIKAM  •  DIGITAL",fontSize=11.sp,color=fg,letterSpacing=2.sp,fontFamily=FontFamily.Serif)}
+    Surface(color=cardPaper,shape=RoundedCornerShape(22.dp),border=BorderStroke(1.dp,line)){Text(if(language=="ID")"ID  ▾" else "EN  ▾",modifier=Modifier.clickable{language=if(language=="ID")"EN" else "ID";prefs.edit().putString("language",language).apply()}.padding(horizontal=13.dp,vertical=9.dp),fontSize=12.sp,color=ink)}
+   }
+   HorizontalDivider(color=gold.copy(alpha=.48f),thickness=1.dp)
+  }
   Box(Modifier.weight(1f)){
    when{
     prompter->Column(Modifier.fillMaxSize()){
@@ -108,19 +125,96 @@ private fun textFor(o:JSONObject,f:JSONObject?,e:JSONObject?,section:String,lang
      Column(Modifier.weight(1f).verticalScroll(scroll).padding(horizontal=24.dp,vertical=16.dp)){Text("Hikmah $selected — $section",fontSize=18.sp,color=gold);Spacer(Modifier.height(20.dp));Text(content,fontSize=fontSize.sp,lineHeight=(fontSize*1.65f).sp,color=fg,modifier=if(mirrored)Modifier.graphicsLayerMirror() else Modifier);Spacer(Modifier.height(500.dp))}
      Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.Center){TextButton(onClick={running=false}){Text("Jeda")};TextButton(onClick={running=false;prompter=false}){Text("Kembali ke bacaan")}}
     }
-    page=="Beranda"->Column(Modifier.verticalScroll(rememberScrollState()).padding(22.dp)){Text("Kitab Al-Hikam",fontSize=32.sp,fontFamily=FontFamily.Serif,color=fg);Text("127 hikmah · Terjemah · Syarah · Kultum · Tausiah",color=fg);Spacer(Modifier.height(20.dp));Button(onClick={select(prefs.getInt("last_hikmah",1))}){Text("Lanjutkan membaca")};Spacer(Modifier.height(20.dp));Text("Terakhir dibaca: Hikmah ${prefs.getInt("last_hikmah",1)}",color=fg);Text("Favorit ${favorites.size} · Bookmark ${bookmarks.size}",color=fg)}
-    page in listOf("Daftar","Favorit","Bookmark")->Column {OutlinedTextField(query,{query=it},label={Text("Cari nomor, judul, Arab, terjemahan")},modifier=Modifier.fillMaxWidth().padding(12.dp));val matches=remember(page,query,favorites,bookmarks,language){(0 until data.length()).filter{idx->val o=data.getJSONObject(idx);val id="${idx+1}";(page!="Favorit"||id in favorites)&&(page!="Bookmark"||id in bookmarks)&&(query.isBlank()||listOf(id,o.optString("title"),o.optString("arab"),o.optString("translation"),o.optString("english")).any{it.contains(query,true)})}};LazyColumn(contentPadding=PaddingValues(12.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){items(matches){idx->val o=data.getJSONObject(idx);Card(onClick={select(idx+1)}){Column(Modifier.fillMaxWidth().padding(14.dp)){Text("${idx+1}. ${o.optString("title")}",fontSize=18.sp,color=ink);Text(if(language=="ID")o.optString("translation") else o.optString("english"),maxLines=2)}}}}}
-    page=="Baca"->Column(Modifier.verticalScroll(scroll).padding(horizontal=16.dp)){
-     Row(verticalAlignment=Alignment.CenterVertically){Text("Hikmah $selected / 127",color=fg,modifier=Modifier.weight(1f));TextButton(onClick={language=if(language=="ID")"EN" else "ID";prefs.edit().putString("language",language).apply()}){Text(language)};TextButton(onClick={favorites=if("$selected" in favorites)favorites-"$selected" else favorites+"$selected";prefs.edit().putStringSet("favorites",favorites).apply()}){Text(if("$selected" in favorites)"♥" else "♡",fontSize=24.sp)};TextButton(onClick={bookmarks=if("$selected" in bookmarks)bookmarks-"$selected" else bookmarks+"$selected";prefs.edit().putStringSet("bookmarks",bookmarks).apply()}){Text(if("$selected" in bookmarks)"🔖" else "☆")}}
-     Text(item.optString("arab"),fontSize=29.sp,lineHeight=48.sp,textAlign=TextAlign.Right,color=fg,modifier=Modifier.fillMaxWidth().padding(vertical=18.dp));Text(if(language=="ID")item.optString("translation") else e?.optString("translation",item.optString("english"))?:item.optString("english"),fontSize=20.sp,lineHeight=32.sp,color=fg)
-     Row(Modifier.horizontalScroll(rememberScrollState())){listOf("Hikmah","Per Frasa","Per Kata","Syarah","Kultum","Tausiah").forEach{s->TextButton(onClick={section=s}){Text(s,color=if(section==s)gold else fg)}}}
-     Text(content,fontSize=fontSize.sp,lineHeight=(fontSize*1.65f).sp,color=fg,modifier=Modifier.padding(vertical=16.dp))
-     Row(Modifier.horizontalScroll(rememberScrollState()),verticalAlignment=Alignment.CenterVertically){TextButton(onClick={fontSize=(fontSize-1).coerceAtLeast(13f);prefs.edit().putFloat("fontSize",fontSize).apply()}){Text("A−")};TextButton(onClick={fontSize=(fontSize+1).coerceAtMost(36f);prefs.edit().putFloat("fontSize",fontSize).apply()}){Text("A+")};TextButton(onClick={prompter=true}){Text("Teleprompter")};TextButton(onClick={val clip=activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager;clip.setPrimaryClip(ClipData.newPlainText("Al-Hikam #$selected", "${item.optString("arab")}\n${item.optString("translation")}\n\n$content"))}){Text("Salin")};TextButton(onClick={val share=Intent(Intent.ACTION_SEND).apply{type="text/plain";putExtra(Intent.EXTRA_TEXT,"Al-Hikam #$selected\n${item.optString("arab")}\n${item.optString("translation")}\n\n$content")};activity.startActivity(Intent.createChooser(share,"Bagikan hikmah"))}){Text("Bagikan")}}
-     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){TextButton(onClick={select(selected-1)},enabled=selected>1){Text("← Sebelumnya")};TextButton(onClick={select(selected+1)},enabled=selected<127){Text("Berikutnya →")}}
-     Spacer(Modifier.height(24.dp))
+    page=="Beranda"->Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal=19.dp,vertical=19.dp),horizontalAlignment=Alignment.CenterHorizontally){
+     Text("✦  بسم الله الرحمن الرحيم  ✦",fontSize=20.sp,color=gold,textAlign=TextAlign.Center)
+     Spacer(Modifier.height(16.dp))
+     Text("Kitab Al-Hikam",fontSize=35.sp,fontFamily=FontFamily.Serif,color=fg,textAlign=TextAlign.Center)
+     Text("IBNU ‘ATHA’ILLAH AS-SAKANDARI",fontSize=10.sp,letterSpacing=2.sp,color=muted,textAlign=TextAlign.Center)
+     Spacer(Modifier.height(17.dp))
+     Text("❖ ─────────── ❖",color=gold,fontSize=18.sp)
+     Spacer(Modifier.height(17.dp))
+     Surface(color=cardPaper,shape=RoundedCornerShape(18.dp),border=BorderStroke(1.dp,line),modifier=Modifier.fillMaxWidth()){
+      Column(Modifier.padding(20.dp),horizontalAlignment=Alignment.CenterHorizontally){
+       Text("PERJALANAN HATI",fontSize=11.sp,letterSpacing=2.sp,color=gold,fontWeight=FontWeight.Bold)
+       Spacer(Modifier.height(10.dp))
+       Text("127 Hikmah Menuju Kedekatan dengan Allah",fontSize=21.sp,lineHeight=29.sp,fontFamily=FontFamily.Serif,color=ink,textAlign=TextAlign.Center)
+       Spacer(Modifier.height(12.dp))
+       Text("Teks Arab • Terjemahan • Syarah • Kultum • Tausiah",fontSize=12.sp,lineHeight=19.sp,color=muted,textAlign=TextAlign.Center)
+       Spacer(Modifier.height(20.dp))
+       Button(onClick={select(prefs.getInt("last_hikmah",1))},colors=ButtonDefaults.buttonColors(containerColor=ink),modifier=Modifier.fillMaxWidth(),shape=RoundedCornerShape(12.dp)){Text("Lanjutkan membaca  →",color=Color.White)}
+       Spacer(Modifier.height(9.dp))
+       Text("Terakhir dibaca: Hikmah ${prefs.getInt("last_hikmah",1)} dari 127",fontSize=12.sp,color=muted)
+      }
+     }
+     Spacer(Modifier.height(18.dp))
+     Row(horizontalArrangement=Arrangement.spacedBy(10.dp),modifier=Modifier.fillMaxWidth()){
+      listOf(Triple("☷","Daftar","127 hikmah"),Triple("♡","Favorit","${favorites.size} disimpan")).forEach{(symbol,target,subtitle)->
+       Surface(modifier=Modifier.weight(1f).clickable{navigate(target)},shape=RoundedCornerShape(14.dp),color=cardPaper,border=BorderStroke(1.dp,line)){
+        Column(Modifier.padding(16.dp)){Text(symbol,fontSize=26.sp,color=gold);Text(target,fontFamily=FontFamily.Serif,fontSize=19.sp,color=ink);Text(subtitle,fontSize=11.sp,color=muted)}
+       }
+      }
+     }
+     Spacer(Modifier.height(10.dp))
+     Surface(modifier=Modifier.fillMaxWidth().clickable{navigate("Bookmark")},shape=RoundedCornerShape(14.dp),color=cardPaper,border=BorderStroke(1.dp,line)){
+      Row(Modifier.padding(16.dp),verticalAlignment=Alignment.CenterVertically){Text("♧",fontSize=26.sp,color=gold);Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text("Penanda Bacaan",fontFamily=FontFamily.Serif,fontSize=19.sp,color=ink);Text("${bookmarks.size} hikmah ditandai",fontSize=11.sp,color=muted)};Text("→",color=gold)}
+     }
+     Spacer(Modifier.height(20.dp))
+     Text("SEJUTA SANTRI  •  MENEBAR HIKMAH",fontSize=10.sp,letterSpacing=1.5.sp,color=muted)
+    }
+    page in listOf("Daftar","Favorit","Bookmark")->Column(Modifier.padding(horizontal=16.dp)) {
+     Spacer(Modifier.height(16.dp))
+     Text(when(page){"Daftar"->"Daftar Hikmah";"Favorit"->"Hikmah Favorit";else->"Penanda Bacaan"},fontSize=28.sp,fontFamily=FontFamily.Serif,color=fg)
+     Text("Kumpulan mutiara hikmah Ibnu ‘Atha’illah",fontSize=12.sp,color=muted)
+     Spacer(Modifier.height(12.dp))
+     OutlinedTextField(query,{query=it},placeholder={Text("Cari hikmah, judul, atau makna…",fontSize=13.sp)},singleLine=true,shape=RoundedCornerShape(12.dp),modifier=Modifier.fillMaxWidth(),colors=OutlinedTextFieldDefaults.colors(focusedBorderColor=gold,unfocusedBorderColor=line))
+     val matches=remember(page,query,favorites,bookmarks,language){(0 until data.length()).filter{idx->val o=data.getJSONObject(idx);val id="${idx+1}";(page!="Favorit"||id in favorites)&&(page!="Bookmark"||id in bookmarks)&&(query.isBlank()||listOf(id,o.optString("title"),o.optString("arab"),o.optString("translation"),o.optString("english")).any{it.contains(query,true)})}}
+     Spacer(Modifier.height(12.dp))
+     LazyColumn(verticalArrangement=Arrangement.spacedBy(9.dp),contentPadding=PaddingValues(bottom=18.dp)){
+      items(matches){idx->val o=data.getJSONObject(idx)
+       Surface(onClick={select(idx+1)},shape=RoundedCornerShape(13.dp),color=cardPaper,border=BorderStroke(1.dp,line),modifier=Modifier.fillMaxWidth()){
+        Row(Modifier.padding(14.dp),verticalAlignment=Alignment.Top){
+         Text("%02d".format(idx+1),fontFamily=FontFamily.Serif,fontSize=24.sp,color=gold,modifier=Modifier.width(44.dp))
+         Column(Modifier.weight(1f)){Text(o.optString("title"),fontSize=17.sp,fontFamily=FontFamily.Serif,color=ink);Spacer(Modifier.height(5.dp));Text(if(language=="ID")o.optString("translation") else o.optString("english"),fontSize=12.sp,lineHeight=18.sp,color=muted,maxLines=3,overflow=TextOverflow.Ellipsis)}
+         Text("›",fontSize=24.sp,color=gold)
+        }
+       }
+      }
+     }
+    }
+    page=="Baca"->Column(Modifier.verticalScroll(scroll).padding(horizontal=17.dp)){
+     Spacer(Modifier.height(16.dp))
+     Row(verticalAlignment=Alignment.CenterVertically){Text("HIKMAH  %02d / 127".format(selected),fontSize=11.sp,letterSpacing=1.5.sp,color=gold,fontWeight=FontWeight.Bold,modifier=Modifier.weight(1f));TextButton(onClick={favorites=if("$selected" in favorites)favorites-"$selected" else favorites+"$selected";prefs.edit().putStringSet("favorites",favorites).apply()}){Text(if("$selected" in favorites)"♥" else "♡",fontSize=25.sp,color=gold)};TextButton(onClick={bookmarks=if("$selected" in bookmarks)bookmarks-"$selected" else bookmarks+"$selected";prefs.edit().putStringSet("bookmarks",bookmarks).apply()}){Text(if("$selected" in bookmarks)"◆" else "◇",fontSize=21.sp,color=gold)}}
+     Text(item.optString("title"),fontFamily=FontFamily.Serif,fontSize=27.sp,color=fg)
+     Spacer(Modifier.height(12.dp))
+     Surface(color=cardPaper,shape=RoundedCornerShape(15.dp),border=BorderStroke(1.dp,line),modifier=Modifier.fillMaxWidth()){
+      Column(Modifier.padding(19.dp),horizontalAlignment=Alignment.CenterHorizontally){
+       Text("۞",fontSize=26.sp,color=gold)
+       Text(item.optString("arab"),fontSize=28.sp,lineHeight=49.sp,textAlign=TextAlign.Center,color=ink,modifier=Modifier.fillMaxWidth().padding(vertical=12.dp))
+       HorizontalDivider(color=line)
+       Spacer(Modifier.height(16.dp))
+       Text(if(language=="ID")item.optString("translation") else e?.optString("translation",item.optString("english"))?:item.optString("english"),fontFamily=FontFamily.Serif,fontSize=18.sp,lineHeight=29.sp,textAlign=TextAlign.Center,color=ink)
+       Spacer(Modifier.height(12.dp))
+      }
+     }
+     Spacer(Modifier.height(17.dp))
+     Text("JELAJAHI HIKMAH",fontSize=11.sp,letterSpacing=1.5.sp,color=gold,fontWeight=FontWeight.Bold)
+     Row(Modifier.horizontalScroll(rememberScrollState()).padding(vertical=8.dp),horizontalArrangement=Arrangement.spacedBy(7.dp)){listOf("Hikmah","Per Frasa","Per Kata","Syarah","Kultum","Tausiah").forEach{s->Surface(onClick={section=s},color=if(section==s)ink else cardPaper,shape=RoundedCornerShape(20.dp),border=BorderStroke(1.dp,if(section==s)ink else line)){Text(s,modifier=Modifier.padding(horizontal=13.dp,vertical=9.dp),fontSize=12.sp,color=if(section==s)Color.White else ink)}}}
+     Surface(color=cardPaper,shape=RoundedCornerShape(14.dp),border=BorderStroke(1.dp,line),modifier=Modifier.fillMaxWidth()){
+      Column(Modifier.padding(18.dp)){Text(section.uppercase(),fontSize=11.sp,letterSpacing=1.4.sp,color=gold,fontWeight=FontWeight.Bold);Spacer(Modifier.height(12.dp));Text(content,fontSize=fontSize.sp,lineHeight=(fontSize*1.65f).sp,color=ink)}
+     }
+     Spacer(Modifier.height(12.dp))
+     Row(Modifier.horizontalScroll(rememberScrollState()),verticalAlignment=Alignment.CenterVertically){TextButton(onClick={fontSize=(fontSize-1).coerceAtLeast(13f);prefs.edit().putFloat("fontSize",fontSize).apply()}){Text("A−",color=fg)};TextButton(onClick={fontSize=(fontSize+1).coerceAtMost(36f);prefs.edit().putFloat("fontSize",fontSize).apply()}){Text("A+",color=fg)};TextButton(onClick={prompter=true}){Text("▷ Teleprompter",color=fg)};TextButton(onClick={val clip=activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager;clip.setPrimaryClip(ClipData.newPlainText("Al-Hikam #$selected", "${item.optString("arab")}\n${item.optString("translation")}\n\n$content"))}){Text("Salin",color=fg)};TextButton(onClick={val share=Intent(Intent.ACTION_SEND).apply{type="text/plain";putExtra(Intent.EXTRA_TEXT,"Al-Hikam #$selected\n${item.optString("arab")}\n${item.optString("translation")}\n\n$content")};activity.startActivity(Intent.createChooser(share,"Bagikan hikmah"))}){Text("Bagikan",color=fg)}}
+     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){TextButton(onClick={select(selected-1)},enabled=selected>1){Text("← Sebelumnya",color=gold)};TextButton(onClick={select(selected+1)},enabled=selected<127){Text("Berikutnya →",color=gold)}}
     }
     page=="Pengaturan"->Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp)){Text("Pengaturan",fontSize=26.sp,color=fg);Row(verticalAlignment=Alignment.CenterVertically){Text("Mode gelap",color=fg,modifier=Modifier.weight(1f));Switch(checked=dark,onCheckedChange={dark=it;prefs.edit().putBoolean("dark",it).apply()})};Text("Bahasa: $language",color=fg);Text("Google Play Ads-Free selamanya",fontSize=19.sp,color=fg);Text(if(adsFree)"Aktif — banner dan interstitial dimatikan" else if(!billingReady)"Menghubungkan Google Play…" else if(!productAvailable)"Produk belum tersedia. Periksa aktivasi produk di Play Console dan jalur pengujian." else "Produk tersedia untuk pembelian",color=fg);Button(onClick=buy,enabled=!adsFree&&billingReady&&productAvailable){Text(if(adsFree)"Sudah dimiliki" else "Beli Ads-Free")};TextButton(onClick=restore,enabled=billingReady){Text("Pulihkan pembelian")};Text("ID produk: $PRODUCT_ID · Iklan: ID uji",fontSize=12.sp,color=fg);Text("Konten offline · 127 hikmah · Penyimpanan lokal",color=fg)}
    }
+  }
+  if(!prompter){
+   HorizontalDivider(color=line)
+   val menus=listOf(Triple("⌂","Beranda","Beranda"),Triple("☷","Daftar","Daftar"),Triple("▤","Baca","Baca"),Triple("♡","Favorit","Favorit"),Triple("◇","Bookmark","Bookmark"),Triple("⚙","Pengaturan","Atur"))
+   Row(Modifier.fillMaxWidth().background(cardPaper).padding(horizontal=3.dp,vertical=4.dp),horizontalArrangement=Arrangement.SpaceEvenly){menus.forEach{(symbol,target,label)->
+    Column(Modifier.weight(1f).clickable{navigate(target)}.background(if(page==target)Color(0xFFE9EDF2) else Color.Transparent,RoundedCornerShape(9.dp)).padding(vertical=4.dp),horizontalAlignment=Alignment.CenterHorizontally){Text(symbol,fontSize=21.sp,color=if(page==target)ink else muted,lineHeight=25.sp);Text(label,fontSize=9.sp,color=if(page==target)ink else muted,maxLines=1)}
+   }}
   }
   // Satu slot banner permanen; tidak dibuat pada tiap halaman/komposisi.
   if(!adsFree&&!prompter)AdBanner()
