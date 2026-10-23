@@ -110,3 +110,6 @@ Removed the duplicate inline Android navigation override and placed a single fin
 - Guided tour: Beranda, Daftar Isi, Kultum, Favorit, Pengaturan, Tentang, Auto-hide, Dark mode, Language.
 - Tooltip placement follows actual top/bottom navigation targets.
 - Existing sticky 320x50 banner and successful bottom navigation layout remain unchanged.
+
+## Splash crash hotfix
+Fixed missing comma between About and Auto-hide tutorial entries. This was a JavaScript syntax error preventing app initialization and splash removal. V1.0.3 unchanged.
