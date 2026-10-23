@@ -41,6 +41,13 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Remove legacy WebView activity left in repository
+        shell: bash
+        run: |
+          rm -f app/src/main/java/id/sejutasantri/alhikam/MainActivity.java
+          rm -f app/src/main/java/id/sejutasantri/alhikam/MainActivity.kt
+          test -f app/src/main/java/id/sejutasantri/alhikam/ComposeMainActivity.kt
+
       - name: Build debug APK
         run: gradle --no-daemon :app:assembleDebug
 

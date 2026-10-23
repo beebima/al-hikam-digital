@@ -1,0 +1,8 @@
+HOTFIX 2 - konflik MainActivity Java/Kotlin
+
+1. Upload seluruh isi ZIP ke root repo GitHub, termasuk folder .github (folder tersembunyi).
+2. Pastikan .github/workflows/android.yml yang baru ikut tertimpa.
+3. HAPUS file lama app/src/main/java/id/sejutasantri/alhikam/MainActivity.java di GitHub bila masih ada.
+4. Activity Kotlin baru bernama ComposeMainActivity.kt; manifest sudah diperbarui.
+5. Workflow baru juga otomatis menghapus MainActivity.java lama sebelum build, sebagai perlindungan bila penghapusan GitHub terlewat.
+6. Belum diverifikasi kompilasi Android; jalankan Actions dan periksa log.
