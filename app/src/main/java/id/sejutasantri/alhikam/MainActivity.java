@@ -25,35 +25,44 @@ public class MainActivity extends Activity {
  private boolean bottomBannerLoaded=false;
  private boolean bottomBannerFailed=false;
  private static final String TEST_BANNER_ID="ca-app-pub-3940256099942544/9214589741";
+ private int adaptiveBannerHeightDp=0;
+ private int adaptiveBannerWidthDp=0;
+ private int deviceBannerWidthDp(){
+   android.util.DisplayMetrics metrics=getResources().getDisplayMetrics();
+   return Math.max(1,Math.round(metrics.widthPixels/metrics.density)-16);
+ }
  private void updateBannerPosition(float cssLeft,float cssTop,float cssWidth,float cssHeight){
    if(!bottomBannerLoaded || bottomBanner==null || adsOverlay==null || web==null || isFinishing())return;
    float scale=web.getScale();
-   int targetWidth=Math.round(320*getResources().getDisplayMetrics().density);
-   int width=Math.min(targetWidth,Math.round(cssWidth*scale));
-   int height=Math.round(50*getResources().getDisplayMetrics().density);
-   int left=Math.round((cssLeft+cssWidth/2)*scale)-width/2+web.getLeft();
+   float density=getResources().getDisplayMetrics().density;
+   int actualWidth=Math.round(adaptiveBannerWidthDp*density);
+   int actualHeight=Math.round(adaptiveBannerHeightDp*density);
+   int left=Math.round((cssLeft+cssWidth/2f)*scale)-actualWidth/2+web.getLeft();
    int top=Math.round(cssTop*scale)+web.getTop();
-   FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(width,height,Gravity.TOP|Gravity.LEFT);
+   FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(actualWidth,actualHeight,Gravity.TOP|Gravity.LEFT);
    lp.leftMargin=Math.max(0,left);lp.topMargin=Math.max(0,top);
    bottomBanner.setLayoutParams(lp);
    bottomBanner.setVisibility(View.VISIBLE);
  }
  private void loadBottomBanner(){
    if(bottomBanner!=null || web==null || adsOverlay==null || isFinishing())return;
+   adaptiveBannerWidthDp=deviceBannerWidthDp();
+   AdSize adaptive=AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this,adaptiveBannerWidthDp);
+   adaptiveBannerHeightDp=adaptive.getHeight();
    bottomBanner=new AdView(this);
    bottomBanner.setAdUnitId(TEST_BANNER_ID);
-   bottomBanner.setAdSize(AdSize.BANNER);
+   bottomBanner.setAdSize(adaptive);
    bottomBanner.setVisibility(View.GONE);
    adsOverlay.addView(bottomBanner,new FrameLayout.LayoutParams(-2,-2));
    bottomBanner.setAdListener(new AdListener(){
      @Override public void onAdLoaded(){
        bottomBannerLoaded=true;bottomBannerFailed=false;
-       web.evaluateJavascript("window.alHikamNativeBannerState&&window.alHikamNativeBannerState(true)",null);
+       if(web!=null)web.evaluateJavascript("window.alHikamNativeBannerState&&window.alHikamNativeBannerState(true,"+adaptiveBannerHeightDp+")",null);
      }
      @Override public void onAdFailedToLoad(LoadAdError error){
        bottomBannerLoaded=false;bottomBannerFailed=true;
        bottomBanner.setVisibility(View.GONE);
-       web.evaluateJavascript("window.alHikamNativeBannerState&&window.alHikamNativeBannerState(false)",null);
+       if(web!=null)web.evaluateJavascript("window.alHikamNativeBannerState&&window.alHikamNativeBannerState(false,0)",null);
      }
    });
    bottomBanner.loadAd(new AdRequest.Builder().build());

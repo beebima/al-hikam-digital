@@ -1,0 +1,11 @@
+AL-HIKAM DIGITAL v1.1.1 — STEP 5 (UKURAN IKLAN)
+
+- Banner native bawah: anchored adaptive, lebar layar minus 16dp; tinggi dari SDK.
+- CSS dan ruang konten menyesuaikan tinggi aktual banner yang berhasil dimuat.
+- Jika gagal memuat, offline, atau premium terverifikasi, ruang banner bawah menghilang.
+- Interstitial fullscreen tetap ditangani SDK, tidak ada ukuran manual.
+- Slot beranda, bab, kultum, tausiah MASIH simulasi responsif; bukan iklan AdMob asli.
+- Google Play Billing premium BELUM aktif; pengecekan premium masih placeholder false.
+- Pengujian ad memakai ID TEST resmi Google.
+
+Upload seluruh isi ZIP ke repository sebelumnya lalu buka GitHub Actions dan cek apakah build hijau.
