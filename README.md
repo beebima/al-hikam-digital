@@ -34,3 +34,13 @@ Real-device profiling, signed AAB, AdMob integration and Google Play Billing. An
 - Bottom inset and Android navigation bar use light mint instead of blank white.
 - Contrast enforcement disabled where supported to prevent forced translucent scrims.
 - APK/device validation still required.
+
+## Lightweight layout revision (V1.0.3 retained)
+- Removed sky clouds and falling leaves and all home decorative motion.
+- Ad-free offer is static.
+- Removed four home shortcut buttons and full learning statistics block.
+- Compact 75/25 learning progress and tutorial cards; progress label and action simplified.
+- Fixed Forest Sage palette, retaining light/dark toggle.
+- Separated System Fonts and Content Fonts cards in settings.
+- Disabled tab transition animations.
+- Android GitHub Actions project included; validate in emulator before publishing.
