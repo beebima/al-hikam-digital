@@ -42,12 +42,14 @@ public class MainActivity extends Activity {
   },"AlHikamAndroid");
   // Explicitly respect Android status/navigation system bars, including Android 15 edge-to-edge.
   android.widget.FrameLayout frame=new android.widget.FrameLayout(this);
+  frame.setBackgroundColor(Color.rgb(22,65,53));
   frame.addView(web,new android.widget.FrameLayout.LayoutParams(-1,-1));
   frame.setOnApplyWindowInsetsListener((view,insets)->{
    android.graphics.Insets bars;
    if(Build.VERSION.SDK_INT>=30){
     bars=insets.getInsets(WindowInsets.Type.statusBars()|WindowInsets.Type.navigationBars()|WindowInsets.Type.displayCutout());
     view.setPadding(bars.left,bars.top,bars.right,bars.bottom);
+    view.setBackgroundColor(Color.rgb(22,65,53));
    }else{
     view.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());
    }

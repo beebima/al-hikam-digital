@@ -13,3 +13,10 @@ Push all files (including hidden `.github/workflows/android.yml`) to GitHub. Act
 
 ## Still pending
 Real-device profiling, signed AAB, AdMob integration and Google Play Billing. Android can delay inexact reminder alarms.
+
+## V1.0.3 Android fixes
+- Continuous ornament motion disabled, falling leaf elements hidden; background illustration remains static.
+- Dark emerald status-bar background with light icons; Android 15+ safe-area padding uses emerald backing.
+- First-run tutorial launches automatically after splash (~3.9 s), only until user skips/completes.
+- Existing user localStorage tutorial completion is respected. To test first-run behavior, clear app data or reinstall.
+- This is a source project; GitHub Actions build and device performance still need validation.
