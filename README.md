@@ -95,3 +95,18 @@ Compact Last Opened card between Progress/Tutorial and Ad-Free. Shows saved last
 
 ## Bottom menu compact follow-up
 Removed the duplicate inline Android navigation override and placed a single final rule at the end of the main stylesheet. The menu now uses a fixed 12px lower cushion rather than expanding with the full Android inset. This lowers menu buttons within the green region, keeping the native gesture bar on a matching background. The HTML bottom ad stays removed. Visual APK test still needed.
+
+## V1.0.3 — Sticky banner above bottom navigation
+- Adds a fixed 50 CSS px banner placeholder, with a 320 px maximum-width ad slot.
+- Banner is fixed directly above the existing menu; measured menu height prevents overlap or gaps.
+- Leaves the successful Nav-Lowered bottom menu positioning and Android gesture inset untouched.
+- Retains the home inline ad placeholder and ad-free promotion.
+- This is a visual placeholder, not a live AdMob SDK placement.
+- Requires APK emulator verification.
+
+## V1.0.3 initial contents screen and guided tutorial order
+- Fresh installations start on Daftar Isi (Contents), not Beranda. Existing users retain their saved tab.
+- First-run tutorial no longer forces the home tab.
+- Guided tour: Beranda, Daftar Isi, Kultum, Favorit, Pengaturan, Tentang, Auto-hide, Dark mode, Language.
+- Tooltip placement follows actual top/bottom navigation targets.
+- Existing sticky 320x50 banner and successful bottom navigation layout remain unchanged.
