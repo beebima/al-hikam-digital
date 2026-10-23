@@ -1,0 +1,12 @@
+AL-HIKAM DIGITAL v1.1.1 — LANGKAH 1/3: MENYIAPKAN SDK
+
+1. Unduh ZIP ini.
+2. Unggah ISI ZIP ke root repository GitHub Android yang saat ini dipakai (bukan file ZIP-nya ke root).
+3. Buka tab Actions, jalankan Build Al-Hikam Android APK bila tidak otomatis.
+4. Unduh artifact APK debug, pasang dan jalankan pada perangkat Android.
+5. Kirim tangkapan layar status Actions (hijau/merah) ke Pipit.
+
+Sudah diubah: dependensi AdMob SDK 25.4.0, Billing Library 9.1.0, izin jaringan, AdMob App ID, inisialisasi SDK.
+Belum diubah: unit iklan nyata, antarmuka banner native, proses pembelian, hak premium. Simulasi UI v1.1.1 masih ada.
+Tidak ada pembayaran nyata pada tahap ini. Jangan rilis versi ini sebagai aplikasi dengan monetisasi aktif.
+Tidak ada Firebase berbayar.

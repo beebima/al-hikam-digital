@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.view.*;
 import android.webkit.*;
+import com.google.android.gms.ads.MobileAds;
 public class MainActivity extends Activity {
  private WebView web;
  private android.widget.FrameLayout frameForSystemBars;
@@ -18,6 +19,9 @@ public class MainActivity extends Activity {
  private static final int NOTIFICATION_REQUEST=19;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
+  // Inisialisasi SDK saja. TIDAK meminta iklan aktif pada tahap ini.
+  // Consent pengguna harus disiapkan sebelum pemuatan iklan nyata.
+  new Thread(() -> MobileAds.initialize(this, status -> {})).start();
   getWindow().setStatusBarColor(Color.rgb(250,246,238));
   getWindow().setNavigationBarColor(Color.TRANSPARENT);
   if(Build.VERSION.SDK_INT>=29){
@@ -41,6 +45,9 @@ public class MainActivity extends Activity {
     }
   });
   web.addJavascriptInterface(new Object(){
+   // V1.1.1: read-only entitlement contract. Must be replaced ONLY after integrating
+   // Google Play Billing verified purchases; no JS method is allowed to set it.
+   @JavascriptInterface public boolean isAdsFree(){return false;}
    @JavascriptInterface public void setBottomBarColor(String hex){
      runOnUiThread(()->{
        try{

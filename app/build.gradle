@@ -6,9 +6,15 @@ android {
         applicationId 'id.sejutasantri.alhikam'
         minSdk 23
         targetSdk 35
-        versionCode 3
-        versionName '1.0.3'
+        versionCode 4
+        versionName '1.1.1'
     }
     buildTypes { release { minifyEnabled false } }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+
+// Tahap 1: SDK resmi; integrasi iklan dan transaksi menyusul setelah build teruji.
+dependencies {
+    implementation 'com.google.android.gms:play-services-ads:25.4.0'
+    implementation 'com.android.billingclient:billing:9.1.0'
 }
