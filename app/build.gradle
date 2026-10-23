@@ -12,3 +12,9 @@ android {
     buildTypes { release { minifyEnabled false } }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
 }
+
+// Tahap 1: SDK resmi; integrasi iklan dan transaksi menyusul setelah build teruji.
+dependencies {
+    implementation 'com.google.android.gms:play-services-ads:25.4.0'
+    implementation 'com.android.billingclient:billing:9.1.0'
+}

@@ -1,0 +1,13 @@
+AL-HIKAM DIGITAL v1.1.1 — STEP 4: SLOT ARTIKEL KULTUM & TAUSIAH
+
+1. Ekstrak ZIP lalu unggah seluruh ISI proyek ke repository Android GitHub yang sama.
+2. Buka tab Actions dan periksa apakah build hijau.
+3. Unduh APK artifact lalu cek minimal bab 1 dan 127 pada Kultum/Tausiah.
+4. Kultum: slot SIMULASI IKLAN setelah baris Pengasuh Masjid Sejuta Santri dan sebelum salam penutup (atau paragraf terakhir jika salam tidak ada).
+5. Tausiah: slot setelah identitas pengasuh, sebelum BERDIALOG DENGAN JAMAAH, sebelum AJAKAN KE JAMAAH, dan sebelum salam penutup.
+6. Pembaca Al-Hikam: slot iklan yang sudah ada pada tiap bab dipertahankan.
+7. Hak ads-free diikat ke lapisan Android, namun transaksi Google Play Billing BELUM diterapkan; belum bisa diuji sebagai pembeli sesungguhnya.
+
+PENTING: slot baru adalah PRATINJAU tata letak, BUKAN banner AdMob yang menghasilkan uang.
+Saat pemasangan SDK untuk slot artikel nanti, placeholder akan diganti native ads dan area harus collapse saat tidak ada iklan atau premium.
+STEP 3 banner bawah native test + interstitial native test tetap dipertahankan.

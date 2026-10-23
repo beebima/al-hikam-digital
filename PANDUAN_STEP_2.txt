@@ -1,0 +1,14 @@
+AL-HIKAM DIGITAL v1.1.1 — STEP 2: INTERSTITIAL ASLI (TEST ADS)
+
+1. Upload ISI ZIP ini ke repository GitHub yang sama, timpa file sejenis.
+2. Periksa Actions sampai berwarna hijau.
+3. Unduh app-debug.apk dari artifact Actions lalu instal di HP untuk memeriksa navigasi.
+
+Saat ini iklan interstitial sudah memakai Google Mobile Ads SDK dengan ID TEST resmi.
+Interstitial baru berpotensi tampil setelah 3 menit sejak aplikasi dibuka, hanya saat perpindahan tab/bab/artikel, dan hanya jika iklan sudah berhasil dimuat.
+Iklan HTML simulasi interstitial TIDAK tampil di aplikasi Android.
+Banner beranda, daftar isi, dan sticky masih placeholder; belum iklan nyata.
+Google Play Billing belum diprogram; status premium belum dapat dibeli.
+Jangan diterbitkan sebagai aplikasi monetisasi final pada tahap ini.
+
+PENTING: Saat pengujian, jangan mengganti ID iklan test dengan ID produksi.

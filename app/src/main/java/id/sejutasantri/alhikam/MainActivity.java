@@ -7,8 +7,90 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.view.*;
 import android.webkit.*;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdListener;
+import android.widget.FrameLayout;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 public class MainActivity extends Activity {
  private WebView web;
+ private FrameLayout adsOverlay;
+ private AdView bottomBanner;
+ private boolean bottomBannerLoaded=false;
+ private boolean bottomBannerFailed=false;
+ private static final String TEST_BANNER_ID="ca-app-pub-3940256099942544/9214589741";
+ private void updateBannerPosition(float cssLeft,float cssTop,float cssWidth,float cssHeight){
+   if(!bottomBannerLoaded || bottomBanner==null || adsOverlay==null || web==null || isFinishing())return;
+   float scale=web.getScale();
+   int targetWidth=Math.round(320*getResources().getDisplayMetrics().density);
+   int width=Math.min(targetWidth,Math.round(cssWidth*scale));
+   int height=Math.round(50*getResources().getDisplayMetrics().density);
+   int left=Math.round((cssLeft+cssWidth/2)*scale)-width/2+web.getLeft();
+   int top=Math.round(cssTop*scale)+web.getTop();
+   FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(width,height,Gravity.TOP|Gravity.LEFT);
+   lp.leftMargin=Math.max(0,left);lp.topMargin=Math.max(0,top);
+   bottomBanner.setLayoutParams(lp);
+   bottomBanner.setVisibility(View.VISIBLE);
+ }
+ private void loadBottomBanner(){
+   if(bottomBanner!=null || web==null || adsOverlay==null || isFinishing())return;
+   bottomBanner=new AdView(this);
+   bottomBanner.setAdUnitId(TEST_BANNER_ID);
+   bottomBanner.setAdSize(AdSize.BANNER);
+   bottomBanner.setVisibility(View.GONE);
+   adsOverlay.addView(bottomBanner,new FrameLayout.LayoutParams(-2,-2));
+   bottomBanner.setAdListener(new AdListener(){
+     @Override public void onAdLoaded(){
+       bottomBannerLoaded=true;bottomBannerFailed=false;
+       web.evaluateJavascript("window.alHikamNativeBannerState&&window.alHikamNativeBannerState(true)",null);
+     }
+     @Override public void onAdFailedToLoad(LoadAdError error){
+       bottomBannerLoaded=false;bottomBannerFailed=true;
+       bottomBanner.setVisibility(View.GONE);
+       web.evaluateJavascript("window.alHikamNativeBannerState&&window.alHikamNativeBannerState(false)",null);
+     }
+   });
+   bottomBanner.loadAd(new AdRequest.Builder().build());
+ }
+
+ private InterstitialAd interstitialAd;
+ private boolean interstitialShowing=false;
+ private long lastInterstitialShownAt=System.currentTimeMillis();
+ private static final long INTERSTITIAL_COOLDOWN_MS=180000L;
+ // Official Google test unit; NEVER live monetization during QA.
+ private static final String TEST_INTERSTITIAL_ID="ca-app-pub-3940256099942544/1033173712";
+ private void loadInterstitial(){
+   if(isFinishing() || interstitialAd!=null || interstitialShowing)return;
+   InterstitialAd.load(this, TEST_INTERSTITIAL_ID, new AdRequest.Builder().build(),new InterstitialAdLoadCallback(){
+     @Override public void onAdLoaded(InterstitialAd ad){interstitialAd=ad;}
+     @Override public void onAdFailedToLoad(LoadAdError error){interstitialAd=null;}
+   });
+ }
+ private void resumeWebNavigation(){
+   if(web!=null)web.evaluateJavascript("window.alHikamNativeInterstitialFinished&&window.alHikamNativeInterstitialFinished()",null);
+ }
+ private boolean isNativeInterstitialAvailable(){
+   return interstitialAd!=null && !interstitialShowing &&
+       System.currentTimeMillis()-lastInterstitialShownAt>=INTERSTITIAL_COOLDOWN_MS;
+ }
+ private void showNativeInterstitial(){
+   InterstitialAd ad=interstitialAd;
+   if(ad==null){resumeWebNavigation();return;}
+   interstitialAd=null;interstitialShowing=true;
+   ad.setFullScreenContentCallback(new FullScreenContentCallback(){
+     @Override public void onAdShowedFullScreenContent(){lastInterstitialShownAt=System.currentTimeMillis();}
+     @Override public void onAdDismissedFullScreenContent(){interstitialShowing=false;resumeWebNavigation();loadInterstitial();}
+     @Override public void onAdFailedToShowFullScreenContent(AdError error){interstitialShowing=false;resumeWebNavigation();loadInterstitial();}
+   });
+   ad.show(this);
+ }
+
  private android.widget.FrameLayout frameForSystemBars;
  private View statusBarBacking;
  private View bottomBarBacking;
@@ -18,6 +100,12 @@ public class MainActivity extends Activity {
  private static final int NOTIFICATION_REQUEST=19;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
+  // Inisialisasi SDK saja. TIDAK meminta iklan aktif pada tahap ini.
+  // Consent pengguna harus disiapkan sebelum pemuatan iklan nyata.
+  new Thread(() -> MobileAds.initialize(this, status -> runOnUiThread(()->{
+    loadInterstitial();
+    loadBottomBanner();
+  }))).start();
   getWindow().setStatusBarColor(Color.rgb(250,246,238));
   getWindow().setNavigationBarColor(Color.TRANSPARENT);
   if(Build.VERSION.SDK_INT>=29){
@@ -44,6 +132,17 @@ public class MainActivity extends Activity {
    // V1.1.1: read-only entitlement contract. Must be replaced ONLY after integrating
    // Google Play Billing verified purchases; no JS method is allowed to set it.
    @JavascriptInterface public boolean isAdsFree(){return false;}
+   @JavascriptInterface public void positionBottomBanner(double l,double t,double w,double h){
+     runOnUiThread(()->updateBannerPosition((float)l,(float)t,(float)w,(float)h));
+   }
+   @JavascriptInterface public void hideBottomBanner(){
+     runOnUiThread(()->{if(bottomBanner!=null)bottomBanner.setVisibility(View.GONE);});
+   }
+   // Synchronous readiness gate; no ad means navigation stays immediate.
+   @JavascriptInterface public boolean nativeInterstitialReady(){return isNativeInterstitialAvailable();}
+   @JavascriptInterface public void showNativeInterstitial(){
+      runOnUiThread(()->MainActivity.this.showNativeInterstitial());
+   }
    @JavascriptInterface public void setBottomBarColor(String hex){
      runOnUiThread(()->{
        try{
@@ -87,6 +186,9 @@ public class MainActivity extends Activity {
   frame.setBackgroundColor(BOTTOM_COLOR);
   frameForSystemBars=frame;
   frame.addView(web,new android.widget.FrameLayout.LayoutParams(-1,-1));
+  adsOverlay=new FrameLayout(this);
+  adsOverlay.setClickable(false);
+  frame.addView(adsOverlay,new FrameLayout.LayoutParams(-1,-1));
   statusBarBacking=new View(this);
   statusBarBacking.setBackgroundColor(activeStatusColor);
   frame.addView(statusBarBacking,new android.widget.FrameLayout.LayoutParams(-1,0,Gravity.TOP));
@@ -131,5 +233,8 @@ public class MainActivity extends Activity {
   if(req==NOTIFICATION_REQUEST && results.length>0 && results[0]==PackageManager.PERMISSION_GRANTED)
    ReminderScheduler.schedule(this);
  }
+ @Override protected void onPause(){if(bottomBanner!=null)bottomBanner.pause();super.onPause();}
+ @Override protected void onResume(){super.onResume();if(bottomBanner!=null)bottomBanner.resume();}
+ @Override protected void onDestroy(){if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }

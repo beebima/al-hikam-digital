@@ -1,0 +1,13 @@
+AL-HIKAM DIGITAL v1.1.1 — STEP 3: BANNER BAWAH ASLI (TEST)
+
+1. Ekstrak ZIP, unggah seluruh ISI folder ke repository GitHub Android yang sama.
+2. Buka Actions; pastikan build hijau. Download APK artifact dari GitHub Actions.
+3. Pasang APK uji di HP; buka dengan internet aktif. Banner Google test muncul di atas navigasi bawah.
+4. Matikan internet/muat ulang aplikasi: jika iklan gagal dimuat, ruang banner harus hilang.
+
+PENTING:
+- STEP 3 hanya mengaktifkan banner bawah NATIVE Google TEST, bukan unit iklan produksi.
+- Header/daftar isi masih placeholder simulasi dan belum menghasilkan pendapatan.
+- Billing masih belum terhubung; pembelian premium belum bisa dipakai.
+- Tidak perlu mengubah source manual. Balas 'hijau' atau kirim error Action ke Pipit.
+- Status build Android sesungguhnya hanya dapat diverifikasi di Actions GitHub.
