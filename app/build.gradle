@@ -1,20 +1,19 @@
-plugins { id 'com.android.application' }
-android {
-    namespace 'id.sejutasantri.alhikam'
-    compileSdk 35
-    defaultConfig {
-        applicationId 'id.sejutasantri.alhikam'
-        minSdk 23
-        targetSdk 35
-        versionCode 4
-        versionName '1.1.1'
-    }
-    buildTypes { release { minifyEnabled false } }
-    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+plugins { id 'com.android.application'; id 'org.jetbrains.kotlin.android'; id 'org.jetbrains.kotlin.plugin.compose' }
+android { namespace 'id.sejutasantri.alhikam'; compileSdk 35
+ defaultConfig { applicationId 'id.sejutasantri.alhikam'; minSdk 23; targetSdk 35; versionCode 4; versionName '1.1.1' }
+ buildTypes { release { minifyEnabled false } }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+ kotlinOptions { jvmTarget = '17' }
+ buildFeatures { compose true }
 }
-
-// Tahap 1: SDK resmi; integrasi iklan dan transaksi menyusul setelah build teruji.
 dependencies {
-    implementation 'com.google.android.gms:play-services-ads:25.4.0'
-    implementation 'com.android.billingclient:billing:9.1.0'
+ implementation platform('androidx.compose:compose-bom:2025.04.01')
+ implementation 'androidx.activity:activity-compose:1.10.1'
+ implementation 'androidx.compose.material3:material3'
+ implementation 'androidx.compose.foundation:foundation'
+ implementation 'androidx.compose.ui:ui'
+ implementation 'androidx.compose.ui:ui-tooling-preview'
+ debugImplementation 'androidx.compose.ui:ui-tooling'
+ implementation 'com.google.android.gms:play-services-ads:24.2.0'
+ implementation 'com.android.billingclient:billing-ktx:7.1.1'
 }

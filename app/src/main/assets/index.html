@@ -1380,37 +1380,4 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
     if(nav&&window.ResizeObserver)new ResizeObserver(syncBottomBanner).observe(nav);
     window.addEventListener('resize',syncBottomBanner);
   });
-})();</script><script>
-
-/* Native-scroll reader prototype: generated HTML chunks use one Android ScrollView. */
-window.openSmoothReader=function(){
- if(!window.AlHikamAndroid?.openNativeReader)return;
- const root=document.getElementById('content');if(!root)return;
- const selectors='.header-ad,.inline-ad-preview,.sermon-inline-ad';
- const ads=Array.from(root.querySelectorAll(selectors)).filter(el=>getComputedStyle(el).display!=='none' && !el.hidden);
- const parts=[];
- function extract(startNode,endNode){
-  const range=document.createRange();
-  if(startNode)range.setStartAfter(startNode);else range.setStart(root,0);
-  if(endNode)range.setEndBefore(endNode);else range.setEnd(root,root.childNodes.length);
-  const wrapper=document.createElement('div');wrapper.appendChild(range.cloneContents());
-  const html=wrapper.innerHTML;if(html.trim())parts.push({type:'html',html});
- }
- let prev=null;
- for(const el of ads){extract(prev,el);parts.push({type:'ad'});prev=el;}
- extract(prev,null);
- const css=Array.from(document.querySelectorAll('style')).map(x=>x.textContent).join('\n');
- window.AlHikamAndroid.openNativeReader(JSON.stringify({parts,css}));
-};
-(function(){
- const btn=document.createElement('button');btn.textContent='Mode Baca Mulus (Uji)';
- btn.setAttribute('aria-label','Buka mode baca scroll native untuk menguji iklan');
- btn.style.cssText='position:fixed;right:12px;bottom:170px;z-index:9999;background:#304634;color:white;border:0;border-radius:20px;padding:10px 14px;font:12px sans-serif;box-shadow:0 2px 9px #0003';
- btn.onclick=window.openSmoothReader;
- document.addEventListener('DOMContentLoaded',()=>{
-   if(window.AlHikamAndroid?.openNativeReader)document.body.appendChild(btn);
- });
-})();
-
-</script>
-</body></html>
+})();</script></body></html>
