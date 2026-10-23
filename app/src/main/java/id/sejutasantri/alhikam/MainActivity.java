@@ -89,7 +89,12 @@ public class MainActivity extends Activity {
       left=insets.getSystemWindowInsetLeft();right=insets.getSystemWindowInsetRight();
     }
     android.widget.FrameLayout.LayoutParams page=(android.widget.FrameLayout.LayoutParams)web.getLayoutParams();
-    page.setMargins(left,top,right,bottom);
+    // Let the WebView extend to the bottom edge, including the system navigation inset.
+    // The HTML banner adds safe padding for gesture/buttons and the nav follows it.
+    page.setMargins(left,top,right,0);
+    final int bottomInsetPx=bottom;
+    web.post(()->web.evaluateJavascript(
+      "document.documentElement.style.setProperty('--android-bottom-inset', '"+bottomInsetPx+"px')",null));
     web.setLayoutParams(page);
     android.widget.FrameLayout.LayoutParams status=(android.widget.FrameLayout.LayoutParams)statusBarBacking.getLayoutParams();
     status.height=top;statusBarBacking.setLayoutParams(status);

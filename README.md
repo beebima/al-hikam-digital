@@ -44,3 +44,13 @@ Real-device profiling, signed AAB, AdMob integration and Google Play Billing. An
 - Separated System Fonts and Content Fonts cards in settings.
 - Disabled tab transition animations.
 - Android GitHub Actions project included; validate in emulator before publishing.
+
+## Bottom navigation layout correction (V1.0.3 unchanged)
+The WebView now reaches the Android bottom edge instead of stopping above the
+system navigation inset. The existing app menu and banner move down together;
+the ad content remains 64px, with extra bottom padding only for the Android
+gesture/button region. This removes the detached blank strip below the banner.
+Requires emulator testing across gesture and three-button navigation modes.
+
+## Last opened chapter (V1.0.3)
+Compact Last Opened card between Progress/Tutorial and Ad-Free. Shows saved lastRead chapter number and localized title, and Open button returns to that chapter. Button disabled until a chapter has been opened. No change to app version.
