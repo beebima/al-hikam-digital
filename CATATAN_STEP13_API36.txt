@@ -1,0 +1,15 @@
+Al-Hikam Digital v1.1.1 - Google Play API 36 Hotfix
+
+Perubahan:
+- compileSdk 36, targetSdk 36, minSdk tetap 24
+- Android Gradle Plugin 8.11.1 / Gradle 8.13
+- GitHub Actions memasang SDK Platform 36
+- versionCode tetap 4 karena AAB sebelumnya belum diterima sebagai rilis
+- Ads/Billing/konten tidak diubah
+
+Cara pakai:
+1. Upload semua isi ZIP source ke repo GitHub (jangan upload keystore).
+2. Actions > Build Signed Play AAB (Internal Testing) > Run workflow (branch main).
+3. Setelah hijau unduh artifact AAB baru dan ekstrak ZIP artifact.
+4. Di Play Console hapus AAB versi lama dari draf rilis, lalu upload app-release.aab yang baru.
+5. Lanjutkan tahap review; peringatan deobfuscation pada build tanpa minify tidak menghalangi rilis.

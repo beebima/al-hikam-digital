@@ -1,11 +1,11 @@
 plugins { id 'com.android.application' }
 android {
     namespace 'id.sejutasantri.alhikam'
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
         applicationId 'id.sejutasantri.alhikam'
         minSdk 24
-        targetSdk 35
+        targetSdk 36
         versionCode 4
         versionName '1.1.1'
     }
