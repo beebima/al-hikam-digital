@@ -1067,6 +1067,75 @@ html.android-native body.home-dashboard #content{
 body.home-dashboard #content > #skyline-hero:first-child{margin-top:0!important}
 body.home-dashboard #content > :last-child{margin-bottom:0!important}
 </style>
+
+<style id="golden-v346-quote-final">
+/* Single authoritative quote layout: the branding and controls share a real footer row. */
+body #skyline-hero.simple-wisdom-card{
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:21px 13px minmax(0,1fr)!important;
+ height:158px!important;min-height:158px!important;max-height:158px!important;
+ padding:10px 13px 9px!important;margin-bottom:10px!important;
+ align-items:stretch!important;justify-items:stretch!important;overflow:hidden!important;
+}
+body #skyline-hero.simple-wisdom-card::before{
+ grid-row:1!important;text-align:center!important;align-self:center!important;
+ margin:0!important;line-height:19px!important;
+}
+body #skyline-hero.simple-wisdom-card .simple-wisdom-label{
+ grid-row:2!important;text-align:center!important;align-self:center!important;
+ margin:0!important;line-height:12px!important;
+}
+body #skyline-hero.simple-wisdom-card .simple-wisdom-content{
+ grid-row:3!important;display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:minmax(0,1fr) 32px!important;
+ align-items:stretch!important;justify-items:stretch!important;
+ width:100%!important;height:100%!important;min-height:0!important;
+ padding:0 4px!important;margin:0!important;gap:2px!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote-wrap{
+ grid-row:1!important;grid-column:1!important;
+ display:flex!important;flex-direction:column!important;justify-content:center!important;
+ position:static!important;inset:auto!important;
+ width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;
+ padding:0!important;margin:0!important;overflow:hidden!important;text-align:right!important;
+ transform:none!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote{
+ width:100%!important;margin:0 0 2px!important;padding:0!important;
+ font-size:13px!important;line-height:1.18!important;text-align:right!important;
+ overflow-wrap:break-word!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-author{
+ width:100%!important;margin:0!important;font-size:9px!important;
+ line-height:1.1!important;text-align:right!important;
+}
+body #skyline-hero.simple-wisdom-card .wisdom-quote-footer{
+ grid-row:2!important;grid-column:1!important;
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:12px!important;min-width:0!important;height:32px!important;
+ position:relative!important;z-index:5!important;
+}
+body #skyline-hero.simple-wisdom-card .wisdom-brand-ar{
+ display:block!important;position:static!important;inset:auto!important;
+ flex:0 0 auto!important;margin:0!important;padding:0!important;
+ font-family:'Noto Naskh Arabic','Traditional Arabic',serif!important;
+ font-size:35px!important;line-height:1!important;font-weight:700!important;
+ color:#C6AA70!important;opacity:.88!important;direction:rtl!important;
+ text-shadow:none!important;pointer-events:none!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote-controls{
+ display:flex!important;position:static!important;inset:auto!important;
+ flex:0 0 auto!important;width:auto!important;height:30px!important;
+ margin:0!important;padding:0!important;gap:8px!important;
+ align-items:center!important;justify-content:flex-end!important;
+ transform:none!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote-btn{
+ flex:0 0 28px!important;width:28px!important;height:28px!important;
+ min-width:28px!important;min-height:28px!important;padding:0!important;
+}
+</style>
 </head><body><script>if(window.AlHikamAndroid)document.documentElement.classList.add('android-native');</script><div class="ambient-ornaments" aria-hidden="true"><span class="orn">✧</span><span class="orn">✦</span><span class="orn">❋</span><span class="orn">✧</span><span class="orn">✦</span><span class="orn">✧</span></div><script>/* Apply saved theme before the splash is painted. */
 try{const saved=JSON.parse(localStorage.getItem('alhikam-v02-state')||'{}');if(saved.theme==='dark')document.body.classList.add('dark')}catch(e){}
 </script><div class="splash" id="splash" aria-label="Memuat aplikasi"><div class="splash-center"><div class="splash-logo" lang="ar">الحكم</div><div class="brand">Al-Hikam Digital</div><div class="splash-line"><span></span></div><small id="loading-label">Menyiapkan ruang hikmah...</small></div><div class="splash-brand" aria-label="Sejuta Santri"><svg role="img" aria-label="Logo Sejuta Santri" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="320" height="160" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
@@ -1459,7 +1528,7 @@ function bookReference(source){
 function localizedReflection(q){return state.lang==='en'&&dailyReflectionsEn[q.id]?dailyReflectionsEn[q.id]:q;}
 function dailyWisdom(){
  const q=localizedReflection(nextReflection());
- return `<div class="wisdom-brand-ar" lang="ar" aria-label="Al-Hikam">الحكم</div><div class="skyline-quote-wrap"><p class="skyline-quote">“${esc(q.text)}”</p><p class="skyline-author">— ${esc(q.author)}</p></div><div class="skyline-quote-controls"><button id="prev-reflection" type="button" class="skyline-quote-btn" aria-label="Nasihat sebelumnya" title="Sebelumnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="skyline-quote-btn" data-copy="${esc(q.text+' — '+q.author)}" aria-label="Salin nasihat" title="Salin"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg></button><button id="next-reflection" type="button" class="skyline-quote-btn" aria-label="Nasihat berikutnya" title="Berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>`;
+ return `<div class="skyline-quote-wrap"><p class="skyline-quote">“${esc(q.text)}”</p><p class="skyline-author">— ${esc(q.author)}</p></div><div class="wisdom-quote-footer"><div class="wisdom-brand-ar" lang="ar" aria-label="Al-Hikam">الحكم</div><div class="skyline-quote-controls"><button id="prev-reflection" type="button" class="skyline-quote-btn" aria-label="Nasihat sebelumnya" title="Sebelumnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="skyline-quote-btn" data-copy="${esc(q.text+' — '+q.author)}" aria-label="Salin nasihat" title="Salin"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg></button><button id="next-reflection" type="button" class="skyline-quote-btn" aria-label="Nasihat berikutnya" title="Berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div>`;
 }
 let skylineQuoteTransitionBusy=false;
 function previousReflection(){
