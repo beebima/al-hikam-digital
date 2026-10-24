@@ -932,7 +932,31 @@ body .no-ads-card{animation:none!important}
 body .no-ads-card::after{display:none!important}
 /* Keep small phones readable without altering native nav/banner inset rules. */
 @media(max-width:360px){body .home-progress-grid{grid-template-columns:minmax(0,1fr) minmax(104px,.8fr)!important;gap:7px!important}body .simple-wisdom-card .skyline-quote{font-size:15px!important}}
-</style></head><body><script>if(window.AlHikamAndroid)document.documentElement.classList.add('android-native');</script><div class="ambient-ornaments" aria-hidden="true"><span class="orn">✧</span><span class="orn">✦</span><span class="orn">❋</span><span class="orn">✧</span><span class="orn">✦</span><span class="orn">✧</span></div><script>/* Apply saved theme before the splash is painted. */
+</style><style id="golden-wisdom-v342">
+/* Golden Wisdom V3.4.2: compact reflection, quiet Uthmani ornament, smooth home chrome */
+body .simple-wisdom-card{
+ height:158px!important;min-height:158px!important;max-height:158px!important;
+ padding:9px 13px 45px!important;position:relative!important;
+ background-color:#20372B!important;
+ background-image:repeating-linear-gradient(45deg,transparent 0 23px,rgba(211,181,116,.035) 24px 25px,transparent 26px 48px),repeating-linear-gradient(-45deg,transparent 0 23px,rgba(211,181,116,.035) 24px 25px,transparent 26px 48px)!important;
+}
+body .simple-wisdom-card::before{font-size:12px!important;margin-bottom:2px!important;line-height:1.25!important}
+body .simple-wisdom-card::after{content:'۞';position:absolute;top:11px;right:13px;color:rgba(216,188,130,.33);font-size:18px;pointer-events:none}
+body .simple-wisdom-card .simple-wisdom-label{font-size:8px!important;margin:0 0 3px!important}
+body .simple-wisdom-card .simple-wisdom-content{flex:1 1 auto!important;min-height:0!important;max-height:100%!important;padding:0 8px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+body .simple-wisdom-card .skyline-quote-wrap{max-height:100%!important;overflow:hidden!important;position:relative!important;inset:auto!important;transform:none!important;padding:0!important}
+body .simple-wisdom-card .skyline-quote{font-size:clamp(10px,3.4vw,14px)!important;line-height:1.23!important;margin:0 0 3px!important;text-align:center!important;color:#F8F0DE!important}
+body .simple-wisdom-card .skyline-author{font-size:9px!important;line-height:1.1!important;text-align:center!important;color:#E0CCA2!important}
+body .simple-wisdom-card .skyline-quote-controls{position:absolute!important;bottom:8px!important;left:0!important;right:0!important;top:auto!important;display:flex!important;justify-content:center!important;align-items:center!important;gap:12px!important;z-index:9!important;transform:none!important}
+body .simple-wisdom-card .skyline-quote-btn{width:29px!important;height:29px!important;min-width:29px!important;background:#365442!important;color:#F9F1E0!important;border:1px solid #9F956D!important}
+/* Home uses the same transform/opacity movement as Auto-hide, not display:none. */
+html.android-native body.home-dashboard .top,body.home-dashboard .shell > .top{display:flex!important;transform:translateY(calc(-100% - 24px))!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html.android-native body.home-dashboard .nav,body.home-dashboard .nav{display:flex!important;transform:translateY(calc(100% + 5px))!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html.android-native body .top,html.android-native body .nav,body .shell > .top,body .nav{transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease,visibility 0s linear .42s!important;will-change:transform,opacity!important}
+html.android-native body:not(.home-dashboard):not(.chrome-hidden) .top,html.android-native body:not(.home-dashboard):not(.chrome-hidden) .nav{visibility:visible!important;opacity:1!important;transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease,visibility 0s!important}
+@media(prefers-reduced-motion:reduce){html.android-native body .top,html.android-native body .nav{transition:none!important}}
+</style>
+</head><body><script>if(window.AlHikamAndroid)document.documentElement.classList.add('android-native');</script><div class="ambient-ornaments" aria-hidden="true"><span class="orn">✧</span><span class="orn">✦</span><span class="orn">❋</span><span class="orn">✧</span><span class="orn">✦</span><span class="orn">✧</span></div><script>/* Apply saved theme before the splash is painted. */
 try{const saved=JSON.parse(localStorage.getItem('alhikam-v02-state')||'{}');if(saved.theme==='dark')document.body.classList.add('dark')}catch(e){}
 </script><div class="splash" id="splash" aria-label="Memuat aplikasi"><div class="splash-center"><div class="splash-logo" lang="ar">الحكم</div><div class="brand">Al-Hikam Digital</div><div class="splash-line"><span></span></div><small id="loading-label">Menyiapkan ruang hikmah...</small></div><div class="splash-brand" aria-label="Sejuta Santri"><svg role="img" aria-label="Logo Sejuta Santri" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="320" height="160" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
 viewBox="2500 18650 10000 5100"
@@ -1089,7 +1113,7 @@ function maybeShowInterstitial(next){
  return true;
 }
 
-function shortcutOpen(key){if(key==='auto'){document.getElementById('autohide-toggle')?.click();render();return}if(key==='dark'){document.getElementById('theme-toggle')?.click();render();return}if(key==='lang'){document.getElementById('header-language')?.click();return}if(key==='short'||key==='talk'){state.sermonKind=key==='talk'?'talk':'short';state.sermonSelected=null;save();go('academy');return}go(key)}
+function shortcutOpen(key){if(key==='auto'){document.getElementById('autohide-toggle')?.click();render();return}if(key==='dark'){document.getElementById('theme-toggle')?.click();render();document.body.classList.toggle('home-dashboard',state.tab==='home'&&!tutorialActive);return}if(key==='lang'){document.getElementById('header-language')?.click();return}if(key==='short'||key==='talk'){state.sermonKind=key==='talk'?'talk':'short';state.sermonSelected=null;save();go('academy');return}go(key)}
 function go(tab){if(tab!==state.tab && maybeShowInterstitial(()=>go(tab)))return;document.body.classList.remove('chrome-hidden');const changed=tab!==state.tab;state.tab=tab;if(tab==='book')state.bookDetail=false;save();render();if(changed){const pane=$('content');pane.classList.remove('tab-enter');void pane.offsetWidth;pane.classList.add('tab-enter');pane.addEventListener('animationend',()=>pane.classList.remove('tab-enter'),{once:true})}scrollTo(0,0)}function openBook(id){if(state.bookDetail && state.tab==='book' && Number(id)!==Number(state.current) && maybeShowInterstitial(()=>openBook(id)))return;document.body.classList.remove('chrome-hidden');state.current=id;state.lastRead=id;state.tab='book';state.bookDetail=true;save();render();scrollTo(0,0)}function completedLabel(id){if(!state.completed.includes(id))return tr('Belum selesai','Not completed');const stamp=state.completedAt?.[id];if(!stamp)return '✅ '+tr('Selesai','Completed');const date=new Date(stamp);if(Number.isNaN(date.getTime()))return '✅ '+tr('Selesai','Completed');const weekday=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{weekday:'long'}).format(date);const datePart=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).format(date);const clock=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(date);return '✅ '+tr('Selesai','Completed')+' - '+weekday+' '+datePart+' '+clock;}function item(d){return `<div class="card row"><div><div class="eyebrow">${tr('Hikmah','Wisdom')} ${String(d.id).padStart(2,'0')}</div><strong>${esc(tr(d.title,d.en))}</strong><div class="sub">${completedLabel(d.id)}</div></div><button class="btn" data-open="${d.id}">${tr('Baca','Read')} →</button></div>`}const ANALYTICS_RANGE_KEY='alhikam-analytics-range-v1';
 const ANALYTICS_FIRST_SEEN_KEY='alhikam-first-seen-v1';
 let analyticsRange='7d';
