@@ -1,0 +1,18 @@
+AL-HIKAM DIGITAL v1.1.1 — BUILD AAB PENGUJIAN INTERNAL
+
+Workflow lama .github/workflows/android.yml tetap membuat APK debug.
+Workflow tambahan .github/workflows/play-internal.yml membuat AAB release bertanda tangan.
+
+Langkah sekali saja:
+1. Simpan file private alhikam-upload.p12 dan password di tempat aman, JANGAN upload ke GitHub.
+2. Di GitHub repository: Settings > Secrets and variables > Actions > New repository secret.
+3. Tambahkan ALHIKAM_UPLOAD_KEYSTORE_B64 dengan nilai seluruh isi keystore-base64.txt.
+4. Tambahkan ALHIKAM_UPLOAD_STORE_PASSWORD dengan nilai password dari PETUNJUK-RAHASIA.txt.
+5. Upload seluruh isi ZIP source project ini ke repository.
+6. GitHub Actions > Build Signed Play AAB (Internal Testing) > Run workflow.
+7. Unduh artifact AAB hasil workflow, ekstrak, lalu upload app-release.aab di Play Console > Internal Testing > Buat rilis baru.
+
+Perhatian: AAB rilis baru harus memiliki versionCode lebih tinggi dibanding rilis sebelumnya.
+VersionName tetap 1.1.1; versionCode saat ini 4.
+File private TIDAK BOLEH di-commit atau dimasukkan ke ZIP source.
+Pastikan memilih Google Play App Signing pada Play Console.

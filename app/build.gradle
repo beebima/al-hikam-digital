@@ -9,7 +9,26 @@ android {
         versionCode 4
         versionName '1.1.1'
     }
-    buildTypes { release { minifyEnabled false } }
+    signingConfigs {
+        playUpload {
+            def path = System.getenv('ALHIKAM_UPLOAD_KEYSTORE_PATH')
+            def password = System.getenv('ALHIKAM_UPLOAD_STORE_PASSWORD')
+            if (path && password) {
+                storeFile file(path)
+                storePassword password
+                keyAlias 'alhikam-upload'
+                keyPassword password
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (System.getenv('ALHIKAM_UPLOAD_KEYSTORE_PATH') && System.getenv('ALHIKAM_UPLOAD_STORE_PASSWORD')) {
+                signingConfig signingConfigs.playUpload
+            }
+        }
+    }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
 }
 
