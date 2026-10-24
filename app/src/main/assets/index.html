@@ -956,6 +956,63 @@ html.android-native body .top,html.android-native body .nav,body .shell > .top,b
 html.android-native body:not(.home-dashboard):not(.chrome-hidden) .top,html.android-native body:not(.home-dashboard):not(.chrome-hidden) .nav{visibility:visible!important;opacity:1!important;transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease,visibility 0s!important}
 @media(prefers-reduced-motion:reduce){html.android-native body .top,html.android-native body .nav{transition:none!important}}
 </style>
+<style id="golden-v343-quote-layout-fix">
+/* Dedicated grid tracks prevent quote controls from ever overlaying the text. */
+body #skyline-hero.simple-wisdom-card{
+ height:158px!important;min-height:158px!important;max-height:158px!important;
+ box-sizing:border-box!important;display:grid!important;
+ grid-template-rows:21px 13px minmax(0,1fr)!important;
+ align-content:stretch!important;justify-items:stretch!important;
+ padding:10px 13px 9px!important;margin:0 0 10px!important;
+ overflow:hidden!important;position:relative!important;
+}
+body #skyline-hero.simple-wisdom-card::before{
+ grid-row:1!important;align-self:start!important;margin:0!important;
+ font-size:14px!important;line-height:19px!important;
+}
+body #skyline-hero.simple-wisdom-card .simple-wisdom-label{
+ grid-row:2!important;align-self:center!important;margin:0!important;
+ font-size:8px!important;line-height:12px!important;
+}
+body #skyline-hero.simple-wisdom-card .simple-wisdom-content{
+ grid-row:3!important;position:relative!important;display:grid!important;
+ grid-template-rows:minmax(0,1fr) 30px!important;
+ gap:2px!important;min-height:0!important;height:100%!important;
+ width:100%!important;padding:0 5px!important;margin:0!important;
+ align-items:stretch!important;justify-items:stretch!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote-wrap{
+ grid-row:1!important;position:static!important;inset:auto!important;
+ transform:none!important;width:100%!important;min-width:0!important;
+ min-height:0!important;max-height:100%!important;overflow:hidden!important;
+ display:flex!important;flex-direction:column!important;justify-content:center!important;
+ padding:0!important;margin:0!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote{
+ font-size:13px!important;line-height:1.18!important;margin:0 0 2px!important;
+ color:#F8F0DE!important;text-align:center!important;
+ overflow-wrap:break-word!important;max-height:none!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-author{
+ font-size:9px!important;line-height:1.1!important;margin:0!important;
+ text-align:center!important;color:#E0CCA2!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote-controls{
+ grid-row:2!important;position:static!important;inset:auto!important;
+ transform:none!important;width:100%!important;height:30px!important;
+ margin:0!important;padding:0!important;display:flex!important;
+ justify-content:center!important;align-items:center!important;
+ gap:12px!important;z-index:2!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote-btn{
+ width:28px!important;height:28px!important;min-width:28px!important;
+ min-height:28px!important;padding:0!important;
+}
+/* On Home alone, remove the surplus vertical reservation above the hero. */
+html.android-native body.home-dashboard .shell{padding-top:calc(var(--top-banner-height,0px) - 24px)!important}
+body.home-dashboard #content{padding-top:0!important;margin-top:0!important}
+body.home-dashboard #content>#skyline-hero:first-child{margin-top:0!important}
+</style>
 </head><body><script>if(window.AlHikamAndroid)document.documentElement.classList.add('android-native');</script><div class="ambient-ornaments" aria-hidden="true"><span class="orn">✧</span><span class="orn">✦</span><span class="orn">❋</span><span class="orn">✧</span><span class="orn">✦</span><span class="orn">✧</span></div><script>/* Apply saved theme before the splash is painted. */
 try{const saved=JSON.parse(localStorage.getItem('alhikam-v02-state')||'{}');if(saved.theme==='dark')document.body.classList.add('dark')}catch(e){}
 </script><div class="splash" id="splash" aria-label="Memuat aplikasi"><div class="splash-center"><div class="splash-logo" lang="ar">الحكم</div><div class="brand">Al-Hikam Digital</div><div class="splash-line"><span></span></div><small id="loading-label">Menyiapkan ruang hikmah...</small></div><div class="splash-brand" aria-label="Sejuta Santri"><svg role="img" aria-label="Logo Sejuta Santri" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="320" height="160" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
@@ -1362,8 +1419,7 @@ function fitSkylineQuote(){
  const wrap=hero.querySelector('.skyline-quote-wrap'),quote=wrap?.querySelector('.skyline-quote'),author=wrap?.querySelector('.skyline-author');
  if(!wrap||!quote)return;
  const controls=hero.querySelector('.skyline-quote-controls');
- const bottom=controls?Math.max(controls.getBoundingClientRect().top-7,hero.getBoundingClientRect().top+48):hero.getBoundingClientRect().bottom-55;
- const available=Math.max(34,Math.min(wrap.clientHeight,bottom-wrap.getBoundingClientRect().top));
+ const available=Math.max(24,wrap.clientHeight-3);
  const base=window.innerWidth<=430?16:18;
  quote.style.setProperty('font-size',base+'px','important');
  if(author)author.style.fontSize='';
