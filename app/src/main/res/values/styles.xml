@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources><style name="AlHikamTheme" parent="android:style/Theme.Material.Light.NoActionBar">
-<item name="android:statusBarColor">#FAF6EE</item>
-<item name="android:navigationBarColor">#EAF7F0</item>
+<item name="android:statusBarColor">#EDE8DB</item>
+<item name="android:navigationBarColor">#EDE8DB</item>
 <item name="android:windowLightStatusBar">true</item>
 <item name="android:windowActionModeOverlay">true</item>
 <item name="android:windowLightNavigationBar">true</item>
