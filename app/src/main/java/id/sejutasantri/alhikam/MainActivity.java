@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
    lastBillingMessage=message;
    runOnUiThread(()->{
      if(web!=null) web.evaluateJavascript("window.alHikamBillingNotice&&window.alHikamBillingNotice("+org.json.JSONObject.quote(message)+")",null);
-     android.widget.Toast.makeText(MainActivity.this,message,android.widget.Toast.LENGTH_LONG).show();
+     // Billing notices are shown only in the Ads-Free card, never as disruptive Toasts.
    });
  }
  private void premiumChanged(boolean value){
