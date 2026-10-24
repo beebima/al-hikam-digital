@@ -1,0 +1,19 @@
+AL-HIKAM DIGITAL v1.1.1 — STEP 8 BETA
+
+Perubahan:
+1. Google Play Billing Library 9.1.0 terhubung ke MainActivity.java.
+2. Produk one-time INAPP: remove_ads_lifetime. Produk harus sudah dibuat dan diaktifkan pada Google Play Console.
+3. Status premium hanya diberikan sesudah BillingClient menerima PURCHASED dari Google Play. PENDING tidak membuka premium.
+4. Pembelian non-consumable di-acknowledge dan queryPurchasesAsync dipakai untuk restore saat aplikasi kembali foreground.
+5. Dua banner native dan interstitial tidak ditampilkan ketika pembelian aktif; placeholder HTML serta upsell ikut disembunyikan.
+6. Auto-hide menu bawah diperhalus dengan transisi translateY + opacity.
+7. Kartu 'Hilangkan iklan' diperbarui dengan benefit, harga yang diambil dari Play jika tersedia, dan tombol pemulihan.
+
+PENTING:
+- Jangan menguji pembayaran asli dari APK debug yang dipasang manual. Gunakan internal test Google Play dengan akun license tester.
+- Kode versi ini bersifat integrasi client-only: status PURCHASED dari Billing Library tanpa verifikasi token server. Sebelum produksi, direkomendasikan melakukan verifikasi purchase token pada backend tepercaya dengan Google Play Developer API, khususnya untuk melawan manipulasi client.
+- SDK AdMob masih memakai ID TEST RESMI Google. Ini bukan versi produksi.
+- Harga transaksi berasal dari Google Play, bukan hardcoded.
+- Paket belum dikompilasi oleh sistem lokal; jalankan GitHub Actions, tes layout, lalu jalankan internal testing Play Billing.
+- Perlu produk one-time aktif dengan Product ID: remove_ads_lifetime.
+- versionName 1.1.1 tetap; versionCode tidak dinaikkan untuk debug. Saat upload AAB ke Play, pastikan versionCode > versi Play sebelumnya.

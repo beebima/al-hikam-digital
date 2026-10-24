@@ -12,6 +12,8 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdListener;
 import android.widget.FrameLayout;
+import com.android.billingclient.api.*;
+import java.util.*;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.FullScreenContentCallback;
@@ -19,6 +21,84 @@ import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 public class MainActivity extends Activity {
+ private static final String REMOVE_ADS_ID="remove_ads_lifetime";
+ private BillingClient billingClient;
+ private volatile boolean adsFree=false;
+ private boolean billingConnected=false;
+ private ProductDetails adFreeProduct;
+ private void billingNotice(String message){runOnUiThread(()->{
+   if(web!=null) web.evaluateJavascript("window.alHikamBillingNotice&&window.alHikamBillingNotice("+org.json.JSONObject.quote(message)+")",null);
+ });}
+ private void premiumChanged(boolean value){
+   adsFree=value;
+   runOnUiThread(()->{
+     if(value){if(topBanner!=null)topBanner.setVisibility(View.GONE);if(bottomBanner!=null)bottomBanner.setVisibility(View.GONE);}
+     if(web!=null)web.evaluateJavascript("window.alHikamPremiumChanged&&window.alHikamPremiumChanged("+value+")",null);
+   });
+ }
+ private void startBilling(){
+   billingClient=BillingClient.newBuilder(this)
+    .setListener((result,purchases)->{
+      if(result.getResponseCode()==BillingClient.BillingResponseCode.OK && purchases!=null) processPurchases(purchases);
+      else if(result.getResponseCode()!=BillingClient.BillingResponseCode.USER_CANCELED) billingNotice("Pembelian belum berhasil: "+result.getDebugMessage());
+    })
+    .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+    .enableAutoServiceReconnection().build();
+   billingClient.startConnection(new BillingClientStateListener(){
+     @Override public void onBillingSetupFinished(BillingResult result){
+       billingConnected=result.getResponseCode()==BillingClient.BillingResponseCode.OK;
+       if(billingConnected){refreshPurchases();queryAdFreeProduct();}
+     }
+     @Override public void onBillingServiceDisconnected(){billingConnected=false;}
+   });
+ }
+ private void refreshPurchases(){
+   if(billingClient==null||!billingClient.isReady())return;
+   QueryPurchasesParams params=QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build();
+   billingClient.queryPurchasesAsync(params,(result,purchases)->{
+     if(result.getResponseCode()==BillingClient.BillingResponseCode.OK)processPurchases(purchases);
+   });
+ }
+ private void processPurchases(List<Purchase> purchases){
+   boolean owned=false;
+   for(Purchase purchase:purchases){
+     if(!purchase.getProducts().contains(REMOVE_ADS_ID))continue;
+     if(purchase.getPurchaseState()==Purchase.PurchaseState.PURCHASED){
+       owned=true;
+       // Production should verify purchase tokens via Play Developer API on a trusted backend.
+       if(!purchase.isAcknowledged()){
+         AcknowledgePurchaseParams params=AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
+         billingClient.acknowledgePurchase(params,result->{
+            if(result.getResponseCode()!=BillingClient.BillingResponseCode.OK)billingNotice("Pembelian diterima; konfirmasi Google Play sedang diproses.");
+         });
+       }
+     } else if(purchase.getPurchaseState()==Purchase.PurchaseState.PENDING){billingNotice("Pembayaran masih menunggu konfirmasi Google Play.");}
+   }
+   premiumChanged(owned);
+ }
+ private void queryAdFreeProduct(){
+   if(billingClient==null||!billingClient.isReady())return;
+   QueryProductDetailsParams.Product product=QueryProductDetailsParams.Product.newBuilder().setProductId(REMOVE_ADS_ID).setProductType(BillingClient.ProductType.INAPP).build();
+   billingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(Collections.singletonList(product)).build(),(result,details)->{
+     adFreeProduct=null;
+     if(result.getResponseCode()==BillingClient.BillingResponseCode.OK && !details.getProductDetailsList().isEmpty())adFreeProduct=details.getProductDetailsList().get(0);
+     if(adFreeProduct!=null && adFreeProduct.getOneTimePurchaseOfferDetailsList()!=null && !adFreeProduct.getOneTimePurchaseOfferDetailsList().isEmpty()){
+       String price=adFreeProduct.getOneTimePurchaseOfferDetailsList().get(0).getFormattedPrice();
+       runOnUiThread(()->{if(web!=null)web.evaluateJavascript("window.alHikamBillingPrice&&window.alHikamBillingPrice("+org.json.JSONObject.quote(price)+")",null);});
+     }
+   });
+ }
+ private void purchaseAdFree(){
+   if(adsFree){billingNotice("Mode bebas iklan sudah aktif.");return;}
+   if(billingClient==null||!billingClient.isReady()){billingNotice("Google Play belum terhubung. Coba lagi setelah aplikasi terpasang lewat Google Play.");return;}
+   if(adFreeProduct==null){queryAdFreeProduct();billingNotice("Produk belum tersedia. Pastikan produk sekali beli sudah aktif di Play Console.");return;}
+   List<ProductDetails.OneTimePurchaseOfferDetails> offers=adFreeProduct.getOneTimePurchaseOfferDetailsList();
+   if(offers==null||offers.isEmpty()){billingNotice("Penawaran pembelian belum tersedia.");return;}
+   String token=offers.get(0).getOfferToken();
+   BillingFlowParams.ProductDetailsParams params=BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(adFreeProduct).setOfferToken(token).build();
+   BillingResult result=billingClient.launchBillingFlow(this,BillingFlowParams.newBuilder().setProductDetailsParamsList(Collections.singletonList(params)).build());
+   if(result.getResponseCode()!=BillingClient.BillingResponseCode.OK)billingNotice("Google Play belum dapat membuka pembayaran: "+result.getDebugMessage());
+ }
  private WebView web;
  private FrameLayout adsOverlay;
  private AdView bottomBanner;
@@ -32,7 +112,7 @@ public class MainActivity extends Activity {
    return Math.max(1,Math.round(metrics.widthPixels/metrics.density)-16);
  }
  private void updateBannerPosition(float cssLeft,float cssTop,float cssWidth,float cssHeight){
-   if(!bottomBannerLoaded || bottomBanner==null || adsOverlay==null || web==null || isFinishing())return;
+   if(adsFree || !bottomBannerLoaded || bottomBanner==null || adsOverlay==null || web==null || isFinishing())return;
    float scale=web.getScale();
    float density=getResources().getDisplayMetrics().density;
    int actualWidth=Math.round(adaptiveBannerWidthDp*density);
@@ -45,7 +125,7 @@ public class MainActivity extends Activity {
    bottomBanner.setVisibility(View.VISIBLE);
  }
  private void loadBottomBanner(){
-   if(bottomBanner!=null || web==null || adsOverlay==null || isFinishing())return;
+   if(adsFree || bottomBanner!=null || web==null || adsOverlay==null || isFinishing())return;
    adaptiveBannerWidthDp=deviceBannerWidthDp();
    AdSize adaptive=AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this,adaptiveBannerWidthDp);
    adaptiveBannerHeightDp=adaptive.getHeight();
@@ -73,7 +153,7 @@ public class MainActivity extends Activity {
  private boolean topBannerLoaded=false;
  private int topBannerHeightDp=0;
  private void updateTopBannerPosition(float cssLeft,float cssTop,float cssWidth,float cssHeight){
-   if(topBanner==null || adsOverlay==null || web==null || !topBannerLoaded || isFinishing())return;
+   if(adsFree || topBanner==null || adsOverlay==null || web==null || !topBannerLoaded || isFinishing())return;
    float scale=web.getScale();
    float density=getResources().getDisplayMetrics().density;
    int width=Math.round(adaptiveBannerWidthDp*density);
@@ -85,7 +165,7 @@ public class MainActivity extends Activity {
    topBanner.setLayoutParams(lp);topBanner.setVisibility(View.VISIBLE);
  }
  private void loadTopBanner(){
-   if(topBanner!=null || adsOverlay==null || web==null || isFinishing())return;
+   if(adsFree || topBanner!=null || adsOverlay==null || web==null || isFinishing())return;
    if(adaptiveBannerWidthDp==0)adaptiveBannerWidthDp=deviceBannerWidthDp();
    AdSize size=AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this,adaptiveBannerWidthDp);
    topBannerHeightDp=size.getHeight();
@@ -107,7 +187,7 @@ public class MainActivity extends Activity {
  // Official Google test unit; NEVER live monetization during QA.
  private static final String TEST_INTERSTITIAL_ID="ca-app-pub-3940256099942544/1033173712";
  private void loadInterstitial(){
-   if(isFinishing() || interstitialAd!=null || interstitialShowing)return;
+   if(adsFree || isFinishing() || interstitialAd!=null || interstitialShowing)return;
    InterstitialAd.load(this, TEST_INTERSTITIAL_ID, new AdRequest.Builder().build(),new InterstitialAdLoadCallback(){
      @Override public void onAdLoaded(InterstitialAd ad){interstitialAd=ad;}
      @Override public void onAdFailedToLoad(LoadAdError error){interstitialAd=null;}
@@ -117,12 +197,12 @@ public class MainActivity extends Activity {
    if(web!=null)web.evaluateJavascript("window.alHikamNativeInterstitialFinished&&window.alHikamNativeInterstitialFinished()",null);
  }
  private boolean isNativeInterstitialAvailable(){
-   return interstitialAd!=null && !interstitialShowing &&
+   return !adsFree && interstitialAd!=null && !interstitialShowing &&
        System.currentTimeMillis()-lastInterstitialShownAt>=INTERSTITIAL_COOLDOWN_MS;
  }
  private void showNativeInterstitial(){
    InterstitialAd ad=interstitialAd;
-   if(ad==null){resumeWebNavigation();return;}
+   if(ad==null || adsFree){resumeWebNavigation();return;}
    interstitialAd=null;interstitialShowing=true;
    ad.setFullScreenContentCallback(new FullScreenContentCallback(){
      @Override public void onAdShowedFullScreenContent(){lastInterstitialShownAt=System.currentTimeMillis();}
@@ -141,6 +221,7 @@ public class MainActivity extends Activity {
  private static final int NOTIFICATION_REQUEST=19;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
+  startBilling();
   // Inisialisasi SDK saja. TIDAK meminta iklan aktif pada tahap ini.
   // Consent pengguna harus disiapkan sebelum pemuatan iklan nyata.
   new Thread(() -> MobileAds.initialize(this, status -> runOnUiThread(()->{
@@ -173,7 +254,9 @@ public class MainActivity extends Activity {
   web.addJavascriptInterface(new Object(){
    // V1.1.1: read-only entitlement contract. Must be replaced ONLY after integrating
    // Google Play Billing verified purchases; no JS method is allowed to set it.
-   @JavascriptInterface public boolean isAdsFree(){return false;}
+   @JavascriptInterface public boolean isAdsFree(){return adsFree;}
+   @JavascriptInterface public void buyAdsFree(){runOnUiThread(()->purchaseAdFree());}
+   @JavascriptInterface public void restoreAdsFree(){runOnUiThread(()->{refreshPurchases();billingNotice("Sedang memeriksa pembelian Google Play...");});}
    @JavascriptInterface public void positionBottomBanner(double l,double t,double w,double h){
      runOnUiThread(()->updateBannerPosition((float)l,(float)t,(float)w,(float)h));
    }
@@ -282,7 +365,7 @@ public class MainActivity extends Activity {
    ReminderScheduler.schedule(this);
  }
  @Override protected void onPause(){if(bottomBanner!=null)bottomBanner.pause();if(topBanner!=null)topBanner.pause();super.onPause();}
- @Override protected void onResume(){super.onResume();if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();}
- @Override protected void onDestroy(){if(topBanner!=null){topBanner.destroy();topBanner=null;}if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
+ @Override protected void onResume(){super.onResume();refreshPurchases();if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();}
+ @Override protected void onDestroy(){if(billingClient!=null){billingClient.endConnection();billingClient=null;}if(topBanner!=null){topBanner.destroy();topBanner=null;}if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }

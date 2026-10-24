@@ -1,0 +1,10 @@
+AL-HIKAM DIGITAL v1.1.1 — STEP 9 BERANDA RINGKAS
+
+Basis: Step 8 Billing + UX.
+1. Hilangkan hero pemandangan, masjid, hari/tanggal beranda; quote dibuat sebagai kartu mandiri yang ringan. Tombol quote prev/copy/next dipertahankan.
+2. Tambahkan 8 fitur beranda dalam grid dua kolom, bilingual Indonesia/Inggris.
+3. Ubah label Terjemah Utuh menjadi Terjemah Indonesia.
+4. Font default konten dan sistem menjadi 14, tanpa menimpa preferensi pengguna lama yang sudah tersimpan.
+5. AdMob 2 fixed banners + interstitial, Billing, teleprompter, dan seluruh data tetap dipertahankan.
+
+CEK: sintaks JavaScript lolos node --check. Belum build Android dan belum diuji di perangkat.
