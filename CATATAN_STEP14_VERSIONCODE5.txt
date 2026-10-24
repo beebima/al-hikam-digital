@@ -1,0 +1,8 @@
+Al-Hikam Digital Step 14 — Version Code 5
+24 Oktober 2026
+
+Penyebab error Play Console: 'Kode versi 4 sudah digunakan'.
+Perubahan HANYA app/build.gradle: versionCode 4 -> 5.
+versionName tetap 1.1.1, minSdk 24, targetSdk 36, compileSdk 36.
+Upload isi ZIP ke GitHub, jalankan workflow Signed Play AAB, lalu upload AAB BARU hasil run ke rilis internal Play Console.
+Kode versi berikutnya harus lebih besar dari 5.
