@@ -289,6 +289,7 @@ public class MainActivity extends Activity {
   web.setWebViewClient(new WebViewClient(){
     @Override public void onPageFinished(WebView v,String url){
       v.evaluateJavascript("document.documentElement.classList.add('android-native');document.documentElement.style.setProperty('--android-bottom-inset','"+bottomInsetPx+"px')",null);
+      v.evaluateJavascript("window.alHikamPremiumChanged&&window.alHikamPremiumChanged("+adsFree+")",null);
       v.evaluateJavascript("window.alHikamBillingNotice&&window.alHikamBillingNotice("+org.json.JSONObject.quote(lastBillingMessage)+")",null);
     }
   });
@@ -407,7 +408,7 @@ public class MainActivity extends Activity {
    ReminderScheduler.schedule(this);
  }
  @Override protected void onPause(){if(bottomBanner!=null)bottomBanner.pause();if(topBanner!=null)topBanner.pause();super.onPause();}
- @Override protected void onResume(){super.onResume();refreshPurchases(false);if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();}
+ @Override protected void onResume(){super.onResume();if(billingClient!=null && billingClient.isReady())refreshPurchases(false);if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();}
  @Override protected void onDestroy(){if(billingClient!=null){billingClient.endConnection();billingClient=null;}if(topBanner!=null){topBanner.destroy();topBanner=null;}if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }
