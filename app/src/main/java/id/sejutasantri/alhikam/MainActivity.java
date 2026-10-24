@@ -24,6 +24,8 @@ public class MainActivity extends Activity {
  private static final String REMOVE_ADS_ID="remove_ads_lifetime";
  private BillingClient billingClient;
  private volatile boolean adsFree=false;
+ private boolean adsSdkReady=false;
+ private volatile String purchaseDiagnostic="Pemeriksaan belum selesai";
  private boolean billingConnected=false;
  private boolean purchaseLookupInProgress=false;
  private ProductDetails adFreeProduct;
@@ -43,8 +45,8 @@ public class MainActivity extends Activity {
        if(topBanner!=null)topBanner.setVisibility(View.GONE);
        if(bottomBanner!=null)bottomBanner.setVisibility(View.GONE);
        if(interstitialAd!=null)interstitialAd=null;
-     }else if(changed){
-       // Previously hidden AdViews must be re-requested after a confirmed refund/revoke.
+     }else if(adsSdkReady && (changed || topBanner==null || bottomBanner==null)){
+       // Also recover banners when free state is unchanged but AdViews were never created.
        if(topBanner!=null){topBanner.destroy();topBanner=null;topBannerLoaded=false;}
        if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;bottomBannerLoaded=false;}
        loadTopBanner();loadBottomBanner();loadInterstitial();
@@ -84,6 +86,8 @@ public class MainActivity extends Activity {
    billingClient.queryPurchasesAsync(params,(result,purchases)->{
      purchaseLookupInProgress=false;
      if(result.getResponseCode()==BillingClient.BillingResponseCode.OK){
+       int count=0; if(purchases!=null)for(Purchase p:purchases)if(p.getProducts().contains(REMOVE_ADS_ID) && p.getPurchaseState()==Purchase.PurchaseState.PURCHASED)count++;
+       purchaseDiagnostic="Google Play: " + count + " pembelian aktif; sinkronisasi berhasil";
        processPurchases(purchases == null ? Collections.emptyList() : purchases);
        if(userRequested){
          boolean found=false;
@@ -92,8 +96,9 @@ public class MainActivity extends Activity {
          }
          billingNotice(found ? "Pembelian Ads-Free ditemukan dan dipulihkan." : "Belum ditemukan pembelian Ads-Free pada akun Google Play ini. Jika sudah membeli, pastikan memakai akun yang sama.");
        }
-     }else if(userRequested){
-       billingNotice("Gagal memeriksa riwayat pembelian Google Play: "+result.getDebugMessage()+" (kode "+result.getResponseCode()+").");
+     }else{
+       purchaseDiagnostic="Pemeriksaan Google Play gagal: " + result.getResponseCode();
+       if(userRequested) billingNotice("Gagal memeriksa riwayat pembelian Google Play: "+result.getDebugMessage()+" (kode "+result.getResponseCode()+").");
      }
    });
  }
@@ -265,6 +270,7 @@ public class MainActivity extends Activity {
   // Inisialisasi SDK saja. TIDAK meminta iklan aktif pada tahap ini.
   // Consent pengguna harus disiapkan sebelum pemuatan iklan nyata.
   new Thread(() -> MobileAds.initialize(this, status -> runOnUiThread(()->{
+    adsSdkReady=true;
     loadInterstitial();
     loadBottomBanner();
     loadTopBanner();
@@ -291,6 +297,10 @@ public class MainActivity extends Activity {
       v.evaluateJavascript("document.documentElement.classList.add('android-native');document.documentElement.style.setProperty('--android-bottom-inset','"+bottomInsetPx+"px')",null);
       v.evaluateJavascript("window.alHikamPremiumChanged&&window.alHikamPremiumChanged("+adsFree+")",null);
       v.evaluateJavascript("window.alHikamBillingNotice&&window.alHikamBillingNotice("+org.json.JSONObject.quote(lastBillingMessage)+")",null);
+      if(!adsFree){
+        if(topBannerLoaded)v.evaluateJavascript("window.alHikamNativeTopBannerState&&window.alHikamNativeTopBannerState(true,"+topBannerHeightDp+")",null);
+        if(bottomBannerLoaded)v.evaluateJavascript("window.alHikamNativeBannerState&&window.alHikamNativeBannerState(true,"+adaptiveBannerHeightDp+")",null);
+      }
     }
   });
   web.addJavascriptInterface(new Object(){
@@ -298,6 +308,7 @@ public class MainActivity extends Activity {
    // Google Play Billing verified purchases; no JS method is allowed to set it.
    @JavascriptInterface public boolean isAdsFree(){return adsFree;}
    @JavascriptInterface public String billingStatus(){return lastBillingMessage;}
+   @JavascriptInterface public String monetizationStatus(){return (adsFree?"PREMIUM":"GRATIS")+" | "+purchaseDiagnostic+" | Banner atas: "+(topBannerLoaded?"siap":"belum")+" | Banner bawah: "+(bottomBannerLoaded?"siap":"belum");}
    @JavascriptInterface public void buyAdsFree(){runOnUiThread(()->{billingNotice("Tombol beli diterima Android. Menghubungkan ke Google Play…");purchaseAdFree();});}
    @JavascriptInterface public void restoreAdsFree(){runOnUiThread(()->{billingNotice("Tombol pemulihan diterima Android. Memeriksa pembelian…");refreshPurchases(true);});}
    @JavascriptInterface public void positionBottomBanner(double l,double t,double w,double h){
@@ -408,7 +419,7 @@ public class MainActivity extends Activity {
    ReminderScheduler.schedule(this);
  }
  @Override protected void onPause(){if(bottomBanner!=null)bottomBanner.pause();if(topBanner!=null)topBanner.pause();super.onPause();}
- @Override protected void onResume(){super.onResume();if(billingClient!=null && billingClient.isReady())refreshPurchases(false);if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();}
+ @Override protected void onResume(){super.onResume();if(billingClient!=null && billingClient.isReady())refreshPurchases(false);if(!adsFree && adsSdkReady){loadTopBanner();loadBottomBanner();}if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();}
  @Override protected void onDestroy(){if(billingClient!=null){billingClient.endConnection();billingClient=null;}if(topBanner!=null){topBanner.destroy();topBanner=null;}if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }

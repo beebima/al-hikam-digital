@@ -1768,4 +1768,14 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
   new MutationObserver(()=>{const el=document.getElementById('billing-price');if(el&&window.__alhikamPrice)el.textContent=' · '+window.__alhikamPrice;const feedback=document.getElementById('billing-feedback');if(feedback&&window.__alhikamBillingStatus)feedback.textContent=window.__alhikamBillingStatus;}).observe(document.getElementById('content')||document.body,{childList:true});
 })();
 </script>
+<script>
+/* QA panel: read-only Google Play entitlement diagnostics; never grants premium. */
+(function(){
+ const prev=settings;
+ settings=function(){return prev()+`<section class="card" id="billing-qa-panel" style="margin-top:14px"><h3>Status Iklan & Pembelian</h3><p id="billing-qa-text" style="font-size:12px;overflow-wrap:anywhere">Memeriksa...</p><button class="btn" id="billing-qa-refresh" type="button">Periksa ulang pembelian</button></section>`;};
+ function update(){const e=document.getElementById('billing-qa-text');if(!e)return;try{e.textContent=window.AlHikamAndroid?.monetizationStatus?.()||'Hanya tersedia pada aplikasi Android'}catch(ex){e.textContent='Status belum dapat dibaca';}}
+ document.addEventListener('click',e=>{if(e.target.closest('#billing-qa-refresh')){window.AlHikamAndroid?.restoreAdsFree?.();setTimeout(update,1200);}},true);
+ new MutationObserver(update).observe(document.getElementById('content')||document.body,{childList:true});
+})();
+</script>
 </body></html>
