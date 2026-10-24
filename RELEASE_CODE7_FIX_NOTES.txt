@@ -1,0 +1,8 @@
+Al-Hikam Digital GoldenWisdom V3.4.6 - Play Internal versionCode 7 / versionName 1.1.1
+BASED ON USER-SUPPLIED GoldenWisdom V3.4.6 ZIP, preserving grid homepage and quote design.
+JAVA: reapply Billing entitlement on WebView onPageFinished; reconcile purchases on resume; recreate banners when verified entitlement transitions paid -> free; suppress disruptive native toast diagnostics.
+HTML: clear ads-free-entitled on verified refund, instead of only adding it.
+No real AdMob production ads; uses official test ad units.
+Do not confuse this ZIP source with previous release code6. Need new signed AAB and Play Store update.
+Test after installation: grid homepage, quote, tutorial, ads after revoked purchase, purchase and restore states.
+If older layout remains, check installed Play version and source commit rather than blindly changing HTML.
