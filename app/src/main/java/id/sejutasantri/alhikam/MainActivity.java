@@ -385,7 +385,7 @@ public class MainActivity extends Activity {
    ReminderScheduler.schedule(this);
  }
  @Override protected void onPause(){if(bottomBanner!=null)bottomBanner.pause();if(topBanner!=null)topBanner.pause();super.onPause();}
- @Override protected void onResume(){super.onResume();refreshPurchases();if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();}
+ @Override protected void onResume(){super.onResume();refreshPurchases(false);if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();}
  @Override protected void onDestroy(){if(billingClient!=null){billingClient.endConnection();billingClient=null;}if(topBanner!=null){topBanner.destroy();topBanner=null;}if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }
