@@ -1012,6 +1012,21 @@ body #skyline-hero.simple-wisdom-card .skyline-quote-btn{
 html.android-native body.home-dashboard .shell{padding-top:calc(var(--top-banner-height,0px) - 24px)!important}
 body.home-dashboard #content{padding-top:0!important;margin-top:0!important}
 body.home-dashboard #content>#skyline-hero:first-child{margin-top:0!important}
+/* V3.4.4: Home-only spacing cleanup. Native ad views and other tabs are untouched. */
+body.home-dashboard .shell,
+html.android-native body.home-dashboard .shell{
+  padding-top:0!important;
+  padding-bottom:8px!important;
+}
+body.home-dashboard #content,
+html.android-native body.home-dashboard #content{
+  padding-top:0!important;
+  padding-bottom:0!important;
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+body.home-dashboard #content > #skyline-hero:first-child{margin-top:0!important}
+body.home-dashboard #content > :last-child{margin-bottom:0!important}
 </style>
 </head><body><script>if(window.AlHikamAndroid)document.documentElement.classList.add('android-native');</script><div class="ambient-ornaments" aria-hidden="true"><span class="orn">✧</span><span class="orn">✦</span><span class="orn">❋</span><span class="orn">✧</span><span class="orn">✦</span><span class="orn">✧</span></div><script>/* Apply saved theme before the splash is painted. */
 try{const saved=JSON.parse(localStorage.getItem('alhikam-v02-state')||'{}');if(saved.theme==='dark')document.body.classList.add('dark')}catch(e){}
