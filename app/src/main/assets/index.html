@@ -519,6 +519,45 @@ body.dark .ws-me{background:#6A503B;color:#FFF0DF}body.dark .ws-lang{background:
 body.dark .ws-dark{background:#315446;color:#E9F5E9}body.dark .ws-settings{background:#67543E;color:#FFF0D8}body.dark .ws-about{background:#4E4A3B;color:#F8F0DC}
 .tutorial-magnify{display:flex;align-items:center;justify-content:center;color:inherit;margin:3px auto 5px}
 .tutorial-compact-cta{display:block!important;background:#FFF9ED!important;color:#73562E!important;border-radius:7px!important;padding:9px 7px!important;text-align:center!important;font-weight:700!important;margin-top:9px!important}
+
+/* Golden Wisdom V3.4.5 — right-aligned quote, right controls, left Arabic identity.
+   Scoped to Home hero only; preserve all existing event handlers and data. */
+body #skyline-hero.simple-wisdom-card{position:relative!important;isolation:isolate!important}
+body #skyline-hero.simple-wisdom-card .wisdom-brand-ar{
+ position:absolute!important;display:flex!important;align-items:flex-end!important;
+ left:15px!important;bottom:12px!important;top:auto!important;
+ font-family:'Noto Naskh Arabic','Traditional Arabic',serif!important;
+ font-size:clamp(27px,9vw,43px)!important;line-height:1.1!important;
+ font-weight:700!important;direction:rtl!important;color:#C6AA70!important;
+ opacity:.78!important;pointer-events:none!important;z-index:1!important;
+ text-shadow:0 1px 2px rgba(0,0,0,.18)!important;
+}
+body #skyline-hero.simple-wisdom-card .simple-wisdom-content{
+ width:100%!important;max-width:100%!important;justify-items:end!important;
+ padding:0 6px!important;box-sizing:border-box!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote-wrap{
+ width:100%!important;max-width:100%!important;align-items:flex-end!important;
+ text-align:right!important;box-sizing:border-box!important;
+ padding-left:0!important;padding-right:0!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote,
+body #skyline-hero.simple-wisdom-card .skyline-author{
+ width:100%!important;text-align:right!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote-controls{
+ position:static!important;grid-row:2!important;
+ display:flex!important;justify-content:flex-end!important;align-items:center!important;
+ width:100%!important;height:30px!important;gap:8px!important;
+ padding:0!important;margin:0!important;transform:none!important;
+}
+body #skyline-hero.simple-wisdom-card .skyline-quote-btn{
+ width:28px!important;height:28px!important;min-width:28px!important;
+ min-height:28px!important;
+}
+@media(max-width:360px){
+ body #skyline-hero.simple-wisdom-card .wisdom-brand-ar{font-size:29px!important;left:11px!important}
+}
 </style><style>
 .copy-section{display:flex;justify-content:flex-end;align-items:center;margin:14px 0 0}.copy-section .copy-btn{min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center}.section-copy-btn{display:inline-flex;align-items:center;gap:7px;font-size:.87rem}.copy-toast{position:fixed;z-index:99999;left:50%;bottom:calc(94px + env(safe-area-inset-bottom, 0px));transform:translate(-50%,12px);background:#172c45;color:#fff;border:1px solid #c6a36a;border-radius:999px;padding:12px 20px;box-shadow:0 8px 30px #0004;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;white-space:nowrap;font-size:14px}.copy-toast.visible{opacity:1;transform:translate(-50%,0)}body.dark .copy-toast{background:#e8edf5;color:#111c2b}@media(prefers-reduced-motion:reduce){.copy-toast{transition:none}}
 </style><style>
@@ -1015,8 +1054,8 @@ body.home-dashboard #content>#skyline-hero:first-child{margin-top:0!important}
 /* V3.4.4: Home-only spacing cleanup. Native ad views and other tabs are untouched. */
 body.home-dashboard .shell,
 html.android-native body.home-dashboard .shell{
-  padding-top:0!important;
-  padding-bottom:8px!important;
+  padding-top:var(--top-banner-height,0px)!important;
+  padding-bottom:calc(var(--native-banner-height,0px) + 8px)!important;
 }
 body.home-dashboard #content,
 html.android-native body.home-dashboard #content{
@@ -1420,7 +1459,7 @@ function bookReference(source){
 function localizedReflection(q){return state.lang==='en'&&dailyReflectionsEn[q.id]?dailyReflectionsEn[q.id]:q;}
 function dailyWisdom(){
  const q=localizedReflection(nextReflection());
- return `<div class="skyline-quote-wrap"><p class="skyline-quote">“${esc(q.text)}”</p><p class="skyline-author">— ${esc(q.author)}</p></div><div class="skyline-quote-controls"><button id="prev-reflection" type="button" class="skyline-quote-btn" aria-label="Nasihat sebelumnya" title="Sebelumnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="skyline-quote-btn" data-copy="${esc(q.text+' — '+q.author)}" aria-label="Salin nasihat" title="Salin"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg></button><button id="next-reflection" type="button" class="skyline-quote-btn" aria-label="Nasihat berikutnya" title="Berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>`;
+ return `<div class="wisdom-brand-ar" lang="ar" aria-label="Al-Hikam">الحكم</div><div class="skyline-quote-wrap"><p class="skyline-quote">“${esc(q.text)}”</p><p class="skyline-author">— ${esc(q.author)}</p></div><div class="skyline-quote-controls"><button id="prev-reflection" type="button" class="skyline-quote-btn" aria-label="Nasihat sebelumnya" title="Sebelumnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="skyline-quote-btn" data-copy="${esc(q.text+' — '+q.author)}" aria-label="Salin nasihat" title="Salin"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg></button><button id="next-reflection" type="button" class="skyline-quote-btn" aria-label="Nasihat berikutnya" title="Berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>`;
 }
 let skylineQuoteTransitionBusy=false;
 function previousReflection(){
