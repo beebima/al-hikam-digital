@@ -1,0 +1,5 @@
+Perbaikan Play Console — Internal Testing (24 Oktober 2026)
+- minSdk ditingkatkan dari 23 (Android 6.0) ke 24 (Android 7.0) sesuai syarat Perlindungan Otomatis Google Play yang muncul pada upload AAB.
+- applicationId, versionName 1.1.1, versionCode 4, signingConfig, workflow AAB dan fitur lainnya tidak diubah.
+- AAB yang sudah ditolak di Play Console perlu dihapus dari draft, lalu unggah AAB hasil build ulang workflow setelah source ini diunggah ke GitHub.
+- Jangan unggah PRIVATE upload key ke GitHub.

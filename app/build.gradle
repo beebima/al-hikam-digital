@@ -4,7 +4,7 @@ android {
     compileSdk 35
     defaultConfig {
         applicationId 'id.sejutasantri.alhikam'
-        minSdk 23
+        minSdk 24
         targetSdk 35
         versionCode 4
         versionName '1.1.1'
