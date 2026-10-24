@@ -36,16 +36,30 @@ public class MainActivity extends Activity {
    });
  }
  private void premiumChanged(boolean value){
+   boolean changed=adsFree!=value;
    adsFree=value;
    runOnUiThread(()->{
-     if(value){if(topBanner!=null)topBanner.setVisibility(View.GONE);if(bottomBanner!=null)bottomBanner.setVisibility(View.GONE);}
+     if(value){
+       if(topBanner!=null)topBanner.setVisibility(View.GONE);
+       if(bottomBanner!=null)bottomBanner.setVisibility(View.GONE);
+       if(interstitialAd!=null)interstitialAd=null;
+     }else if(changed){
+       // Previously hidden AdViews must be re-requested after a confirmed refund/revoke.
+       if(topBanner!=null){topBanner.destroy();topBanner=null;topBannerLoaded=false;}
+       if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;bottomBannerLoaded=false;}
+       loadTopBanner();loadBottomBanner();loadInterstitial();
+     }
      if(web!=null)web.evaluateJavascript("window.alHikamPremiumChanged&&window.alHikamPremiumChanged("+value+")",null);
    });
  }
  private void startBilling(){
    billingClient=BillingClient.newBuilder(this)
     .setListener((result,purchases)->{
-      if(result.getResponseCode()==BillingClient.BillingResponseCode.OK && purchases!=null) processPurchases(purchases);
+      if(result.getResponseCode()==BillingClient.BillingResponseCode.OK && purchases!=null) {
+        processPurchases(purchases);
+        // Reconcile against all currently owned products, not only the update event.
+        refreshPurchases(false);
+      }
       else if(result.getResponseCode()!=BillingClient.BillingResponseCode.USER_CANCELED) billingNotice("Pembelian belum berhasil: "+result.getDebugMessage());
     })
     .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
@@ -93,7 +107,8 @@ public class MainActivity extends Activity {
        if(!purchase.isAcknowledged()){
          AcknowledgePurchaseParams params=AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
          billingClient.acknowledgePurchase(params,result->{
-            if(result.getResponseCode()!=BillingClient.BillingResponseCode.OK)billingNotice("Pembelian diterima; konfirmasi Google Play sedang diproses.");
+            if(result.getResponseCode()!=BillingClient.BillingResponseCode.OK)
+              billingNotice("Pembelian diterima, tetapi acknowledgement gagal (kode "+result.getResponseCode()+"): "+result.getDebugMessage());
          });
        }
      } else if(purchase.getPurchaseState()==Purchase.PurchaseState.PENDING){billingNotice("Pembayaran masih menunggu konfirmasi Google Play.");}

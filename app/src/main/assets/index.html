@@ -1750,7 +1750,8 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
 (function(){
   const root=document.documentElement;
   window.alHikamPremiumChanged=function(active){
-    if(active){root.classList.add('ads-free-entitled');root.style.setProperty('--native-banner-height','0px');root.style.setProperty('--top-banner-height','0px');root.classList.remove('native-banner-ready','native-top-banner-ready');}
+    root.classList.toggle('ads-free-entitled',!!active);
+    if(active){root.style.removeProperty('--native-banner-height');root.style.removeProperty('--top-banner-height');root.classList.remove('native-banner-ready','native-top-banner-ready');}
     if(typeof syncMonetizationPresentation==='function')syncMonetizationPresentation();
   };
   window.alHikamBillingPrice=function(price){window.__alhikamPrice=price;const el=document.getElementById('billing-price');if(el)el.textContent=' · '+price;};
