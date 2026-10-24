@@ -1769,13 +1769,41 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
 })();
 </script>
 <script>
-/* QA panel: read-only Google Play entitlement diagnostics; never grants premium. */
+/* Billing diagnostic panel is inserted into the real Settings DOM after rendering.
+   No function wrapping, so it works with the GoldenWisdom UI renderer. */
 (function(){
- const prev=settings;
- settings=function(){return prev()+`<section class="card" id="billing-qa-panel" style="margin-top:14px"><h3>Status Iklan & Pembelian</h3><p id="billing-qa-text" style="font-size:12px;overflow-wrap:anywhere">Memeriksa...</p><button class="btn" id="billing-qa-refresh" type="button">Periksa ulang pembelian</button></section>`;};
- function update(){const e=document.getElementById('billing-qa-text');if(!e)return;try{e.textContent=window.AlHikamAndroid?.monetizationStatus?.()||'Hanya tersedia pada aplikasi Android'}catch(ex){e.textContent='Status belum dapat dibaca';}}
- document.addEventListener('click',e=>{if(e.target.closest('#billing-qa-refresh')){window.AlHikamAndroid?.restoreAdsFree?.();setTimeout(update,1200);}},true);
- new MutationObserver(update).observe(document.getElementById('content')||document.body,{childList:true});
+  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 9';
+  function mount(){
+    const content=document.getElementById('content');
+    if(!content || !window.state && typeof state==='undefined')return;
+    if(state.tab!=='settings' || document.getElementById('billing-qa-panel'))return;
+    const section=document.createElement('section');
+    section.className='card settings-card';
+    section.id='billing-qa-panel';
+    section.style.cssText='margin:12px 0 18px;padding:16px;';
+    section.innerHTML='<h3 style="margin:0 0 10px">Status Iklan &amp; Pembelian</h3>'+
+      '<p style="font-size:11px;opacity:.75;margin-bottom:8px">'+MARK+'</p>'+
+      '<p id="billing-qa-text" style="font-size:13px;overflow-wrap:anywhere;white-space:pre-line">Memeriksa status...</p>'+
+      '<button class="btn" id="billing-qa-refresh" type="button" style="min-height:42px">Periksa ulang pembelian</button>';
+    content.insertBefore(section,content.firstChild.nextSibling);
+    update();
+  }
+  function update(){
+    const el=document.getElementById('billing-qa-text');if(!el)return;
+    try{el.textContent=window.AlHikamAndroid?.monetizationStatus?.()||'Diagnostik tersedia di aplikasi Android.';}
+    catch(e){el.textContent='Gagal membaca status: '+String(e);}
+  }
+  document.addEventListener('click',function(e){
+    if(e.target.closest('#billing-qa-refresh')){
+      const status=document.getElementById('billing-qa-text');if(status)status.textContent='Meminta pemeriksaan Google Play...';
+      window.AlHikamAndroid?.restoreAdsFree?.();
+      setTimeout(update,1600);
+      setTimeout(update,4000);
+    }
+  },true);
+  const content=document.getElementById('content')||document.body;
+  new MutationObserver(()=>{mount();update();}).observe(content,{childList:true});
+  mount();
 })();
 </script>
 </body></html>
