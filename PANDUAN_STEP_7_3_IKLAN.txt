@@ -1,0 +1,13 @@
+AL-HIKAM DIGITAL v1.1.1 — DUA BANNER TETAP + SATU INTERSTITIAL
+
+Basis: Step 6 Revisi Favorit (BUKAN Native Scroll).
+
+1. Interstitial AdMob TEST: tetap min. 3 menit, pada aksi navigasi yang sudah ada.
+2. Banner AdMob TEST bagian BAWAH: kini di bawah navigasi tab, di atas area navigasi sistem Android.
+3. Banner AdMob TEST bagian ATAS: kini di bawah status/notifikasi sistem Android, di atas header Al-Hikam.
+4. Semua slot banner dalam beranda/daftar isi/bacaan/favorit/kultum/tausiyah dimatikan, termasuk jembatan scroll sync dan native overlay inline.
+5. Banner menggunakan anchored adaptive size; saat gagal dimuat, ruangnya tersembunyi.
+6. Play Billing belum terintegrasi; status premium tetap belum tersedia sampai tahap berikutnya.
+
+Silakan upload SELURUH ISI ZIP ke repo GitHub, timpa file lama, cek Actions, install APK pengujian dan pastikan tidak ada iklan yang menutupi menu/teks.
+Jika aktivitas klik atau gulir lambat, kirim screenshot/video.
