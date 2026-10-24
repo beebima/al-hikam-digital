@@ -1,0 +1,17 @@
+Al-Hikam Digital v1.1.1 — Step 10: Billing diagnostic & restore feedback
+
+Perubahan:
+- Tombol Pulihkan Pembelian menyatakan apakah ada hak beli yang ditemukan atau tidak.
+- Tombol Beli memberi pesan ketika produk remove_ads_lifetime belum tersedia.
+- Error koneksi, pencarian produk, dan pemulihan menampilkan kode Google Play.
+- Tidak mengaktifkan premium jika pembelian tidak ditemukan.
+
+SYARAT PENGUJIAN NYATA:
+1. Buat/aktifkan produk satu kali ID remove_ads_lifetime di Google Play Console.
+2. Unggah AAB versi uji ke track internal/tertutup; tunggu produk dan rilis tersedia.
+3. Gunakan akun tester dan instal aplikasi dari tautan Play Store track tersebut.
+4. Uji pembelian dengan metode tes Google Play (license tester).
+5. Jika error muncul, catat PESAN DAN KODE tepatnya.
+
+Perhatian: Build GitHub berwarna hijau hanya membuktikan kompilasi, bukan bahwa produk Billing sudah bisa dibeli.
+Pembelian yang diverifikasi oleh backend Google Play Developer API direkomendasikan untuk aplikasi produksi.

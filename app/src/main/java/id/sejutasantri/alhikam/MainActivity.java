@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
  private BillingClient billingClient;
  private volatile boolean adsFree=false;
  private boolean billingConnected=false;
+ private boolean purchaseLookupInProgress=false;
  private ProductDetails adFreeProduct;
  private void billingNotice(String message){runOnUiThread(()->{
    if(web!=null) web.evaluateJavascript("window.alHikamBillingNotice&&window.alHikamBillingNotice("+org.json.JSONObject.quote(message)+")",null);
@@ -47,16 +48,34 @@ public class MainActivity extends Activity {
    billingClient.startConnection(new BillingClientStateListener(){
      @Override public void onBillingSetupFinished(BillingResult result){
        billingConnected=result.getResponseCode()==BillingClient.BillingResponseCode.OK;
-       if(billingConnected){refreshPurchases();queryAdFreeProduct();}
+       if(billingConnected){refreshPurchases(false);queryAdFreeProduct();}
+       else billingNotice("Google Play Billing belum terhubung: "+result.getDebugMessage()+" (kode "+result.getResponseCode()+").");
      }
      @Override public void onBillingServiceDisconnected(){billingConnected=false;}
    });
  }
- private void refreshPurchases(){
-   if(billingClient==null||!billingClient.isReady())return;
+ private void refreshPurchases(boolean userRequested){
+   if(billingClient==null||!billingClient.isReady()){
+     if(userRequested)billingNotice("Layanan Google Play belum siap. Pastikan Play Store aktif, internet tersambung, lalu buka ulang aplikasi dan coba lagi.");
+     return;
+   }
+   if(purchaseLookupInProgress)return;
+   purchaseLookupInProgress=true;
    QueryPurchasesParams params=QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build();
    billingClient.queryPurchasesAsync(params,(result,purchases)->{
-     if(result.getResponseCode()==BillingClient.BillingResponseCode.OK)processPurchases(purchases);
+     purchaseLookupInProgress=false;
+     if(result.getResponseCode()==BillingClient.BillingResponseCode.OK){
+       processPurchases(purchases == null ? Collections.emptyList() : purchases);
+       if(userRequested){
+         boolean found=false;
+         if(purchases!=null)for(Purchase purchase:purchases){
+           if(purchase.getProducts().contains(REMOVE_ADS_ID) && purchase.getPurchaseState()==Purchase.PurchaseState.PURCHASED){found=true;break;}
+         }
+         billingNotice(found ? "Pembelian Ads-Free ditemukan dan dipulihkan." : "Belum ditemukan pembelian Ads-Free pada akun Google Play ini. Jika sudah membeli, pastikan memakai akun yang sama.");
+       }
+     }else if(userRequested){
+       billingNotice("Gagal memeriksa riwayat pembelian Google Play: "+result.getDebugMessage()+" (kode "+result.getResponseCode()+").");
+     }
    });
  }
  private void processPurchases(List<Purchase> purchases){
@@ -82,6 +101,7 @@ public class MainActivity extends Activity {
    billingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(Collections.singletonList(product)).build(),(result,details)->{
      adFreeProduct=null;
      if(result.getResponseCode()==BillingClient.BillingResponseCode.OK && !details.getProductDetailsList().isEmpty())adFreeProduct=details.getProductDetailsList().get(0);
+     if(adFreeProduct==null){billingNotice("Produk remove_ads_lifetime belum tersedia dari Google Play (kode "+result.getResponseCode()+"). Pastikan produk aktif dan instal aplikasi dari track pengujian Play Store.");}
      if(adFreeProduct!=null && adFreeProduct.getOneTimePurchaseOfferDetailsList()!=null && !adFreeProduct.getOneTimePurchaseOfferDetailsList().isEmpty()){
        String price=adFreeProduct.getOneTimePurchaseOfferDetailsList().get(0).getFormattedPrice();
        runOnUiThread(()->{if(web!=null)web.evaluateJavascript("window.alHikamBillingPrice&&window.alHikamBillingPrice("+org.json.JSONObject.quote(price)+")",null);});
@@ -91,7 +111,7 @@ public class MainActivity extends Activity {
  private void purchaseAdFree(){
    if(adsFree){billingNotice("Mode bebas iklan sudah aktif.");return;}
    if(billingClient==null||!billingClient.isReady()){billingNotice("Google Play belum terhubung. Coba lagi setelah aplikasi terpasang lewat Google Play.");return;}
-   if(adFreeProduct==null){queryAdFreeProduct();billingNotice("Produk belum tersedia. Pastikan produk sekali beli sudah aktif di Play Console.");return;}
+   if(adFreeProduct==null){queryAdFreeProduct();billingNotice("Produk remove_ads_lifetime belum tersedia. Buat dan aktifkan produk satu kali di Play Console, lalu instal aplikasi dari track pengujian Play Store.");return;}
    List<ProductDetails.OneTimePurchaseOfferDetails> offers=adFreeProduct.getOneTimePurchaseOfferDetailsList();
    if(offers==null||offers.isEmpty()){billingNotice("Penawaran pembelian belum tersedia.");return;}
    String token=offers.get(0).getOfferToken();
@@ -256,7 +276,7 @@ public class MainActivity extends Activity {
    // Google Play Billing verified purchases; no JS method is allowed to set it.
    @JavascriptInterface public boolean isAdsFree(){return adsFree;}
    @JavascriptInterface public void buyAdsFree(){runOnUiThread(()->purchaseAdFree());}
-   @JavascriptInterface public void restoreAdsFree(){runOnUiThread(()->{refreshPurchases();billingNotice("Sedang memeriksa pembelian Google Play...");});}
+   @JavascriptInterface public void restoreAdsFree(){runOnUiThread(()->refreshPurchases(true));}
    @JavascriptInterface public void positionBottomBanner(double l,double t,double w,double h){
      runOnUiThread(()->updateBannerPosition((float)l,(float)t,(float)w,(float)h));
    }
