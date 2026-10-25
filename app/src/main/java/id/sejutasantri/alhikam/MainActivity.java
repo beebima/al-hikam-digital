@@ -14,6 +14,12 @@ import com.google.android.gms.ads.AdListener;
 import android.widget.FrameLayout;
 import com.android.billingclient.api.*;
 import java.util.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.FullScreenContentCallback;
@@ -23,6 +29,15 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 public class MainActivity extends Activity {
  private static final String REMOVE_ADS_ID="remove_ads_lifetime";
  private BillingClient billingClient;
+ // HTTPS endpoint. Cloud Run is currently IAM-private, so Android will initially receive
+ // 401/403. Network errors NEVER revoke an existing purchase. Public access must only
+ // be enabled with server-side purchase validation and appropriate abuse protections.
+ private static final String VERIFY_URL="https://sejutasantri-billing-verifier-654659401534.asia-southeast2.run.app/verify";
+ private volatile String deniedPurchaseToken=null;
+ private volatile String lastVerificationToken=null;
+ private volatile boolean verificationInFlight=false;
+ private volatile long lastSuccessfulVerificationAt=0L;
+ private volatile int verificationSequence=0;
  private volatile boolean adsFree=false;
  private boolean adsSdkReady=false;
  private volatile String purchaseDiagnostic="Pemeriksaan belum selesai";
@@ -107,18 +122,85 @@ public class MainActivity extends Activity {
    for(Purchase purchase:purchases){
      if(!purchase.getProducts().contains(REMOVE_ADS_ID))continue;
      if(purchase.getPurchaseState()==Purchase.PurchaseState.PURCHASED){
-       owned=true;
-       // Production should verify purchase tokens via Play Developer API on a trusted backend.
+       if(!purchase.getPurchaseToken().equals(deniedPurchaseToken)) owned=true;
+       verifyPurchaseWithServer(purchase.getPurchaseToken());
+       // Locally owned purchase is only provisional until server verification completes.
        if(!purchase.isAcknowledged()){
          AcknowledgePurchaseParams params=AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
          billingClient.acknowledgePurchase(params,result->{
             if(result.getResponseCode()!=BillingClient.BillingResponseCode.OK)
               billingNotice("Pembelian diterima, tetapi acknowledgement gagal (kode "+result.getResponseCode()+"): "+result.getDebugMessage());
+            else billingNotice("Google Play: acknowledgement pembelian berhasil.");
          });
        }
      } else if(purchase.getPurchaseState()==Purchase.PurchaseState.PENDING){billingNotice("Pembayaran masih menunggu konfirmasi Google Play.");}
    }
+   if(!owned && (purchases==null || purchases.isEmpty())){
+     deniedPurchaseToken=null;
+     lastVerificationToken=null;
+   }
    premiumChanged(owned);
+ }
+ /**
+  * Server-assisted reconciliation. No secret embedded in the APK. A signed Google Play
+  * purchase token is obtained only from BillingClient and sent to the fixed HTTPS host.
+  * Only an explicit verified denial can remove locally reported entitlement.
+  * Network errors, 401/403 (private Cloud Run), and 5xx preserve local entitlement.
+  */
+ private void verifyPurchaseWithServer(String token){
+   if(token==null || token.length()<8) return;
+   if(token.equals(deniedPurchaseToken)) return;
+   if(token.equals(lastVerificationToken) && System.currentTimeMillis()-lastSuccessfulVerificationAt<600000L)return;
+   if(verificationInFlight && token.equals(lastVerificationToken)) return;
+   verificationInFlight=true;
+   lastVerificationToken=token;
+   final int sequence=++verificationSequence;
+   new Thread(()->{
+     HttpURLConnection conn=null;
+     try {
+       URL url=new URL(VERIFY_URL);
+       conn=(HttpURLConnection)url.openConnection();
+       conn.setRequestMethod("POST");
+       conn.setConnectTimeout(7000);
+       conn.setReadTimeout(12000);
+       conn.setDoOutput(true);
+       conn.setRequestProperty("Content-Type","application/json; charset=utf-8");
+       conn.setRequestProperty("Accept","application/json");
+       org.json.JSONObject body=new org.json.JSONObject();
+       body.put("packageName",getPackageName());
+       body.put("productId",REMOVE_ADS_ID);
+       body.put("purchaseToken",token);
+       byte[] bytes=body.toString().getBytes(StandardCharsets.UTF_8);
+       try(OutputStream out=conn.getOutputStream()){out.write(bytes);}
+       int status=conn.getResponseCode();
+       if(status==200){
+         InputStream stream=conn.getInputStream();
+         ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+         byte[] chunk=new byte[2048];int n;
+         while((n=stream.read(chunk))!=-1){if(buffer.size()+n>16384)throw new Exception("Oversized response");buffer.write(chunk,0,n);}
+         stream.close();
+         org.json.JSONObject reply=new org.json.JSONObject(buffer.toString("UTF-8"));
+         if(!"GOOGLE_PLAY_VERIFIED".equals(reply.optString("status")))throw new Exception("Unexpected verification status");
+         boolean entitled=reply.optBoolean("entitled",false);
+         String state=reply.optString("purchaseState","UNKNOWN");
+         synchronized(this){
+           if(sequence!=verificationSequence)return;
+           deniedPurchaseToken=entitled?null:token;
+           lastSuccessfulVerificationAt=System.currentTimeMillis();
+           verificationInFlight=false;
+         }
+         purchaseDiagnostic="Server Play API: "+state+(entitled?"; PREMIUM terverifikasi":"; akses Ads-Free tidak valid");
+         premiumChanged(entitled);
+       }else{
+         // 401/403 are expected while the Cloud Run service remains IAM-private.
+         synchronized(this){if(sequence==verificationSequence)verificationInFlight=false;}
+         purchaseDiagnostic="Google Play lokal aktif; verifikasi server belum tersedia (HTTP "+status+")";
+       }
+     } catch(Exception e){
+       synchronized(this){if(sequence==verificationSequence)verificationInFlight=false;}
+       purchaseDiagnostic="Google Play lokal aktif; verifikasi server tertunda";
+     } finally{if(conn!=null)conn.disconnect();}
+   },"play-purchase-verifier").start();
  }
  private void queryAdFreeProduct(){
    if(billingClient==null||!billingClient.isReady())return;

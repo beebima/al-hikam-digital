@@ -1,0 +1,31 @@
+AL-HIKAM CODE 12 — v.1.1.12 — SERVER-ASSISTED VERIFICATION (STAGED)
+
+Isi:
+- app/ versi 12: tetap mempertahankan UI GoldenWisdom, bottom flush, unit iklan uji, dan interstitial.
+- Java BillingClient tetap mengakui pembelian PURCHASED dan kini mencatat sukses acknowledgement.
+- Untuk token PURCHASED, app mencoba POST HTTPS /verify ke server Google Cloud resmi.
+- Balasan eksplisit dari API Google Play (termasuk refund quantity = 0 bila tersedia)
+  dapat menonaktifkan Ads-Free untuk token itu. Status PENDING/CANCELLED -> tidak premium.
+- Kegagalan koneksi/401/403/5xx: tidak otomatis mencabut Premium (safety bagi pembeli sah).
+- Tidak ada service-account JSON/API secret di APK.
+- backend-cloud-run/ berisi implementasi index.js + package.json untuk Cloud Run Function.
+
+PENTING — BELUM AKTIF END-TO-END:
+Cloud Run saat ini REQUIRE AUTHENTICATION (IAM). Permintaan Android ke /verify akan ditolak
+oleh Cloud Run IAM (401/403) hingga ada mekanisme autentikasi aplikasi yang sesuai.
+JANGAN membuka server ke publik tanpa mitigasi penyalahgunaan (Play Integrity,
+rate limiting/quotas, dan monitoring biaya), karena purchase token bersifat sensitif.
+Kode backend hanya memvalidasi token ke Google Play, BELUM memasang RTDN, Firestore,
+atau kebijakan refund eksternal. Refund tanpa revoke harus dikaji berdasarkan
+purchaseState dan refundableQuantity; tidak semua refund muncul di Voided Purchases.
+GET / tetap menyediakan diagnosis Voided Purchases ringkas tanpa token.
+
+Cara deploy backend: Cloud Run > Source > Edit source: replace index.js dan package.json
+sesuai file backend-cloud-run, function entry point helloHttp, Save and redeploy.
+Tes GET privat Cloud Shell memakai gcloud auth print-identity-token seperti sebelumnya.
+
+Pastikan verifikasi server selesai dan keamanan endpoint disiapkan sebelum membuat
+klaim bahwa refund otomatis sudah berfungsi di aplikasi produksi.
+
+Tidak dilakukan build AAB lokal (Android SDK/Gradle tidak tersedia di lingkungan ini).
+Gunakan GitHub Actions existing signing secrets. Upload isi ZIP ini ke repositori.
