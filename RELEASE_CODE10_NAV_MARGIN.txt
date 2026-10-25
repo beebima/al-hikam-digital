@@ -1,0 +1,1 @@
+Code 10: menambah jarak bawah navigasi sekitar 4px saat tanpa banner dan 4px di atas banner saat banner aktif, plus sedikit ruang ekstra shell agar tombol bawah tidak menyenggol area gesture. Perubahan sengaja sangat kecil agar ruang baca tidak banyak berkurang.
