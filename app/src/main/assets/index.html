@@ -867,6 +867,15 @@ html.ads-free-entitled.android-native .shell{padding-top:20px!important;padding-
 html.ads-free-entitled.android-native .top{top:0!important}
 html.ads-free-entitled.android-native .nav{bottom:4px!important}
 
+/* Code 10 paint-only fix: fill the tiny exposed strip below the floating nav.
+   Active banner must remain uncovered. No extra vertical space is introduced. */
+html.android-native:not(.native-banner-ready) body::after,
+html.android-native.ads-free-entitled body::after{
+ content:""!important;position:fixed!important;left:0!important;right:0!important;
+ bottom:0!important;height:8px!important;pointer-events:none!important;
+ background:var(--royal-chrome-bg,#304634)!important;z-index:19!important;
+}
+
 /* v1.1.1 compact top chrome: similar height to bottom navigation. */
 html.android-native .top,html.android-native body.dark .top{
   min-height:48px!important;height:48px!important;
