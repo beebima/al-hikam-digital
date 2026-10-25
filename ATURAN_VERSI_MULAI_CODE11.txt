@@ -1,0 +1,4 @@
+KESEPAKATAN VERSI
+Internal testing: versionCode N dan versionName v.1.1.N (misalnya 11 => v.1.1.11). Jangan gunakan ulang versionCode yang pernah diupload ke Play Console.
+Setelah aplikasi final siap produksi, target versionName v.1.1, dengan versionCode tetap harus lebih tinggi dari yang pernah dipakai.
+Paket ini: Code 11 / v.1.1.11, Bottom Flush Fix.

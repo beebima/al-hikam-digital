@@ -1,0 +1,1 @@
+Fixed actual cause of empty strip: CSS bottom:+4px removed. Nav flush to bottom at 0px without native ad and flush to top of native banner when present. Android gesture area keeps system handling. Version code 11; version name 1.1.1. No Billing changes.

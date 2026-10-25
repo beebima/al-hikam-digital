@@ -857,15 +857,15 @@ html.android-native .top-ad-slot{height:100%;width:100%;visibility:hidden}
 html.android-native:not(.native-top-banner-ready) .top-ad-sticky{display:none!important}
 html.android-native .shell{padding-top:calc(20px + var(--top-banner-height,0px))!important}
 html.android-native .top{top:var(--top-banner-height,0px)!important}
-html.android-native .nav,html.android-native body .nav,html.android-native body.dark .nav{bottom:calc(var(--native-banner-height,0px) + 4px)!important;padding-top:3px!important;padding-bottom:4px!important}
+html.android-native .nav,html.android-native body .nav,html.android-native body.dark .nav{bottom:var(--native-banner-height,0px)!important;padding-top:3px!important;padding-bottom:4px!important}
 html.android-native .bottom-ad-sticky{bottom:0!important;border-top:1px solid var(--line,#d7dfd1)!important}
 html.android-native .shell{padding-bottom:calc(71px + var(--native-banner-height,0px))!important}
 html.android-native:not(.native-banner-ready) .shell{padding-bottom:71px!important}
-html.android-native:not(.native-banner-ready) .nav{bottom:4px!important}
+html.android-native:not(.native-banner-ready) .nav{bottom:0!important}
 html.ads-free-entitled .top-ad-sticky,html.ads-free-entitled .bottom-ad-sticky{display:none!important}
 html.ads-free-entitled.android-native .shell{padding-top:20px!important;padding-bottom:71px!important}
 html.ads-free-entitled.android-native .top{top:0!important}
-html.ads-free-entitled.android-native .nav{bottom:4px!important}
+html.ads-free-entitled.android-native .nav{bottom:0!important}
 
 /* Code 10 paint-only fix: fill the tiny exposed strip below the floating nav.
    Active banner must remain uncovered. No extra vertical space is introduced. */
