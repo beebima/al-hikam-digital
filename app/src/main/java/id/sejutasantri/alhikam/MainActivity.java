@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
  // be enabled with server-side purchase validation and appropriate abuse protections.
  private static final String VERIFY_URL="https://sejutasantri-billing-verifier-654659401534.asia-southeast2.run.app/verify";
  private FirebaseAuth firebaseAuth=null;
- private volatile String firebaseSetup='Firebase belum dikonfigurasi';
+ private volatile String firebaseSetup="Firebase belum dikonfigurasi";
  private void initFirebaseBilling(){
    try{
      org.json.JSONObject cfg;
