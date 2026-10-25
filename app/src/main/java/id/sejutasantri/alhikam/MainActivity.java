@@ -1,4 +1,8 @@
 package id.sejutasantri.alhikam;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import android.Manifest;
 import android.app.*;
 import android.os.*;
@@ -33,6 +37,44 @@ public class MainActivity extends Activity {
  // 401/403. Network errors NEVER revoke an existing purchase. Public access must only
  // be enabled with server-side purchase validation and appropriate abuse protections.
  private static final String VERIFY_URL="https://sejutasantri-billing-verifier-654659401534.asia-southeast2.run.app/verify";
+ private FirebaseAuth firebaseAuth=null;
+ private volatile String firebaseSetup='Firebase belum dikonfigurasi';
+ private void initFirebaseBilling(){
+   try{
+     org.json.JSONObject cfg;
+     try(InputStream in=getAssets().open("firebase-billing-config.json")){
+       ByteArrayOutputStream out=new ByteArrayOutputStream(); byte[] b=new byte[512];int n;
+       while((n=in.read(b))!=-1){if(out.size()+n>4096)throw new Exception("config too large");out.write(b,0,n);}
+       cfg=new org.json.JSONObject(out.toString("UTF-8"));
+     }
+     String apiKey=cfg.optString("apiKey","");
+     String appId=cfg.optString("applicationId","");
+     String projectId=cfg.optString("projectId","");
+     if(apiKey.isEmpty()||appId.isEmpty()||projectId.isEmpty()||apiKey.startsWith("REPLACE_"))return;
+     if(FirebaseApp.getApps(this).isEmpty()){
+       FirebaseOptions opts=new FirebaseOptions.Builder().setApiKey(apiKey).setApplicationId(appId).setProjectId(projectId).build();
+       FirebaseApp.initializeApp(this,opts);
+     }
+     firebaseAuth=FirebaseAuth.getInstance();
+     firebaseSetup="Firebase siap";
+   }catch(Exception e){firebaseSetup="Firebase belum dikonfigurasi";}
+ }
+ private void sendFirebaseAuthenticatedVerification(String purchaseToken){
+   if(firebaseAuth==null){purchaseDiagnostic="Google Play lokal aktif; verifikasi server menunggu konfigurasi Firebase";return;}
+   FirebaseUser current=firebaseAuth.getCurrentUser();
+   if(current==null){
+     firebaseAuth.signInAnonymously().addOnCompleteListener(task->{
+       if(task.isSuccessful())sendFirebaseAuthenticatedVerification(purchaseToken);
+       else purchaseDiagnostic="Google Play lokal aktif; autentikasi Firebase belum tersedia";
+     });
+     return;
+   }
+   current.getIdToken(false).addOnCompleteListener(task->{
+     if(task.isSuccessful() && task.getResult()!=null && task.getResult().getToken()!=null)
+       verifyPurchaseWithIdToken(purchaseToken,task.getResult().getToken());
+     else purchaseDiagnostic="Google Play lokal aktif; token Firebase tidak tersedia";
+   });
+ }
  private volatile String deniedPurchaseToken=null;
  private volatile String lastVerificationToken=null;
  private volatile boolean verificationInFlight=false;
@@ -123,7 +165,7 @@ public class MainActivity extends Activity {
      if(!purchase.getProducts().contains(REMOVE_ADS_ID))continue;
      if(purchase.getPurchaseState()==Purchase.PurchaseState.PURCHASED){
        if(!purchase.getPurchaseToken().equals(deniedPurchaseToken)) owned=true;
-       verifyPurchaseWithServer(purchase.getPurchaseToken());
+       sendFirebaseAuthenticatedVerification(purchase.getPurchaseToken());
        // Locally owned purchase is only provisional until server verification completes.
        if(!purchase.isAcknowledged()){
          AcknowledgePurchaseParams params=AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
@@ -147,7 +189,7 @@ public class MainActivity extends Activity {
   * Only an explicit verified denial can remove locally reported entitlement.
   * Network errors, 401/403 (private Cloud Run), and 5xx preserve local entitlement.
   */
- private void verifyPurchaseWithServer(String token){
+ private void verifyPurchaseWithIdToken(String token,String idToken){
    if(token==null || token.length()<8) return;
    if(token.equals(deniedPurchaseToken)) return;
    if(token.equals(lastVerificationToken) && System.currentTimeMillis()-lastSuccessfulVerificationAt<600000L)return;
@@ -166,6 +208,7 @@ public class MainActivity extends Activity {
        conn.setDoOutput(true);
        conn.setRequestProperty("Content-Type","application/json; charset=utf-8");
        conn.setRequestProperty("Accept","application/json");
+       conn.setRequestProperty("Authorization","Bearer "+idToken);
        org.json.JSONObject body=new org.json.JSONObject();
        body.put("packageName",getPackageName());
        body.put("productId",REMOVE_ADS_ID);
@@ -348,6 +391,7 @@ public class MainActivity extends Activity {
  private static final int NOTIFICATION_REQUEST=19;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
+  initFirebaseBilling();
   startBilling();
   // Inisialisasi SDK saja. TIDAK meminta iklan aktif pada tahap ini.
   // Consent pengguna harus disiapkan sebelum pemuatan iklan nyata.

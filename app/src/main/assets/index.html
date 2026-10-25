@@ -1758,7 +1758,7 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
 <script>
 (function(){
   const root=document.documentElement;
-  window.__alhikamBuildIdentifier='GoldenWisdom V3.4.6 | Play code 7 | billing-reconcile';
+  window.__alhikamBuildIdentifier='GoldenWisdom V3.4.6 | Code 13 | Firebase billing staged';
   window.alHikamPremiumChanged=function(active){
     root.classList.toggle('ads-free-entitled',!!active);
     if(active){root.style.removeProperty('--native-banner-height');root.style.removeProperty('--top-banner-height');root.classList.remove('native-banner-ready','native-top-banner-ready');}
@@ -1781,7 +1781,7 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
 /* Billing diagnostic panel is inserted into the real Settings DOM after rendering.
    No function wrapping, so it works with the GoldenWisdom UI renderer. */
 (function(){
-  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 9';
+  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 13';
   function mount(){
     const content=document.getElementById('content');
     if(!content || !window.state && typeof state==='undefined')return;
