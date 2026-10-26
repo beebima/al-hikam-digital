@@ -39,4 +39,7 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:34.12.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'androidx.work:work-runtime:2.10.5'
+    // Required by WorkManager Worker API: ListenableFuture.
+    // Full Android Guava avoids the 9999.0-empty artifact conflict.
+    implementation 'com.google.guava:guava:31.0.1-android'
 }
