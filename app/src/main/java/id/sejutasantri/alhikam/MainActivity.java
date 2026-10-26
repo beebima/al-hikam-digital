@@ -74,9 +74,8 @@ public class MainActivity extends Activity {
      else purchaseDiagnostic="Google Play lokal aktif; token Firebase tidak tersedia";
    });
  }
- // Foreground reconciliation every 9 minutes while open.
- // Background reconciliation handled separately by PeriodicWorkRequest every 3 hours (best effort).
- private static final long PURCHASE_CHECK_INTERVAL_MS=9L*60L*1000L;
+ // Foreground reconciliation every 3 minutes while the application is active.
+ private static final long PURCHASE_CHECK_INTERVAL_MS=3L*60L*1000L;
  private final Handler billingRefreshHandler=new Handler(Looper.getMainLooper());
  private volatile long lastAutoPurchaseCheckAt=0L;
  private boolean billingForeground=false;
@@ -419,7 +418,7 @@ public class MainActivity extends Activity {
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
   initFirebaseBilling();
-  BackgroundBillingWorker.schedule(this);
+  androidx.work.WorkManager.getInstance(this).cancelUniqueWork("alhikam-background-billing-3h");
   startBilling();
   // Inisialisasi SDK saja. TIDAK meminta iklan aktif pada tahap ini.
   // Consent pengguna harus disiapkan sebelum pemuatan iklan nyata.
@@ -574,18 +573,15 @@ public class MainActivity extends Activity {
  }
  @Override protected void onPause(){
    billingForeground=false;
-   getSharedPreferences("billing_background",MODE_PRIVATE).edit().putBoolean("visible",false).apply();
    billingRefreshHandler.removeCallbacks(foregroundBillingRefresh);
    if(bottomBanner!=null)bottomBanner.pause();if(topBanner!=null)topBanner.pause();super.onPause();
  }
  @Override protected void onResume(){
    super.onResume();
    billingForeground=true;
-   getSharedPreferences("billing_background",MODE_PRIVATE).edit().putBoolean("visible",true).putLong("visibleAt",System.currentTimeMillis()).apply();
-   // A fresh launch triggers the normal startBilling() check; returning after 3 hours rechecks.
+   // A fresh launch triggers startBilling(); foreground checks every 3 minutes.
    if(billingClient!=null && billingClient.isReady() &&
-      (lastAutoPurchaseCheckAt==0L || System.currentTimeMillis()-lastAutoPurchaseCheckAt>=PURCHASE_CHECK_INTERVAL_MS ||
-       getSharedPreferences("billing_background",MODE_PRIVATE).getLong("checkedAt",0L)>lastAutoPurchaseCheckAt))
+      (lastAutoPurchaseCheckAt==0L || System.currentTimeMillis()-lastAutoPurchaseCheckAt>=PURCHASE_CHECK_INTERVAL_MS))
      refreshPurchases(false);
    scheduleForegroundBillingRefresh();
    if(!adsFree && adsSdkReady){loadTopBanner();loadBottomBanner();}
@@ -593,7 +589,6 @@ public class MainActivity extends Activity {
  }
  @Override protected void onDestroy(){
    billingForeground=false;
-   getSharedPreferences("billing_background",MODE_PRIVATE).edit().putBoolean("visible",false).apply();
    billingRefreshHandler.removeCallbacks(foregroundBillingRefresh);
    if(billingClient!=null){billingClient.endConnection();billingClient=null;}
    if(topBanner!=null){topBanner.destroy();topBanner=null;}

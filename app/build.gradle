@@ -6,8 +6,8 @@ android {
         applicationId 'id.sejutasantri.alhikam'
         minSdk 24
         targetSdk 36
-        versionCode 14
-        versionName 'v.1.1.14'
+        versionCode 15
+        versionName 'v.1.1.15'
     }
     signingConfigs {
         playUpload {
@@ -39,7 +39,4 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:34.12.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'androidx.work:work-runtime:2.10.5'
-    // Required by WorkManager Worker API: ListenableFuture.
-    // Full Android Guava avoids the 9999.0-empty artifact conflict.
-    implementation 'com.google.guava:guava:31.0.1-android'
 }

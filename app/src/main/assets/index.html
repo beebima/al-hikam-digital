@@ -503,8 +503,8 @@ html.android-native body.dark .nav{
 html.android-native .shell{padding-bottom:calc(68px + var(--android-bottom-inset,0px))!important}
 
 /* Golden Wisdom V3.4 — nine-color home dashboard */
-body.home-dashboard .shell > .top{display:none!important}
-body.home-dashboard .nav{display:none!important}
+body.home-dashboard.chrome-hidden .shell > .top{display:none!important}
+body.home-dashboard.chrome-hidden .nav{display:none!important}
 body.home-dashboard .shell{padding-top:8px!important}
 body.home-dashboard #content{padding-bottom:calc(var(--native-banner-height,0px) + 20px)!important}
 .wisdom-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}
@@ -1009,11 +1009,20 @@ body .simple-wisdom-card .skyline-author{font-size:9px!important;line-height:1.1
 body .simple-wisdom-card .skyline-quote-controls{position:absolute!important;bottom:8px!important;left:0!important;right:0!important;top:auto!important;display:flex!important;justify-content:center!important;align-items:center!important;gap:12px!important;z-index:9!important;transform:none!important}
 body .simple-wisdom-card .skyline-quote-btn{width:29px!important;height:29px!important;min-width:29px!important;background:#365442!important;color:#F9F1E0!important;border:1px solid #9F956D!important}
 /* Home uses the same transform/opacity movement as Auto-hide, not display:none. */
-html.android-native body.home-dashboard .top,body.home-dashboard .shell > .top{display:flex!important;transform:translateY(calc(-100% - 24px))!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
-html.android-native body.home-dashboard .nav,body.home-dashboard .nav{display:flex!important;transform:translateY(calc(100% + 5px))!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html.android-native body.home-dashboard.chrome-hidden .top,body.home-dashboard.chrome-hidden .shell > .top{display:flex!important;transform:translateY(calc(-100% - 24px))!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html.android-native body.home-dashboard.chrome-hidden .nav,body.home-dashboard.chrome-hidden .nav{display:flex!important;transform:translateY(calc(100% + 5px))!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 html.android-native body .top,html.android-native body .nav,body .shell > .top,body .nav{transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease,visibility 0s linear .42s!important;will-change:transform,opacity!important}
-html.android-native body:not(.home-dashboard):not(.chrome-hidden) .top,html.android-native body:not(.home-dashboard):not(.chrome-hidden) .nav{visibility:visible!important;opacity:1!important;transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease,visibility 0s!important}
+html.android-native body:not(.chrome-hidden) .top,html.android-native body:not(.chrome-hidden) .nav{visibility:visible!important;opacity:1!important;transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease,visibility 0s!important}
 @media(prefers-reduced-motion:reduce){html.android-native body .top,html.android-native body .nav{transition:none!important}}
+
+/* Code 15: Beranda obeys the same 3-second chrome-hidden timer as other tabs. */
+html.android-native body.home-dashboard:not(.chrome-hidden) .top,
+html.android-native body.home-dashboard:not(.chrome-hidden) .nav,
+body.home-dashboard:not(.chrome-hidden) .shell > .top,
+body.home-dashboard:not(.chrome-hidden) .nav {
+  display:flex!important;transform:none!important;opacity:1!important;
+  visibility:visible!important;pointer-events:auto!important;
+}
 </style>
 <style id="golden-v343-quote-layout-fix">
 /* Dedicated grid tracks prevent quote controls from ever overlaying the text. */
@@ -1497,7 +1506,7 @@ function ensureStudyContent(){
   function next(){
    if(i===names.length){resolve();return}
    const el=document.createElement('script');el.src=names[i++]+'.js';
-   el.onload=()=>{if(el.src.endsWith('/fullHikam.js')){for(const [id,paragraphs] of Object.entries(injectedKultum)){if(fullHikam[id])fullHikam[id].shortId=paragraphs;}}next()};el.onerror=()=>reject(new Error('Failed to load offline learning data'));
+   el.onload=()=>{/* Code 15: DOCX naskah is authoritative; no legacy Kultum override. */next()};el.onerror=()=>reject(new Error('Failed to load offline learning data'));
    document.body.appendChild(el);
   }
   next();
@@ -1792,7 +1801,33 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
 /* Billing diagnostic panel is inserted into the real Settings DOM after rendering.
    No function wrapping, so it works with the GoldenWisdom UI renderer. */
 (function(){
-  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 14';
+  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 15';
+  const en=()=>state.lang==='en';
+  const bilingual=(id,english)=>en()?english:id;
+  function localizeDiagnostics(raw){
+    if(!en())return raw;
+    const replacements=[
+      ['Status Iklan & Pembelian','Ads & Purchase Status'],
+      ['Pembelian aktif','Active purchases'],['pembelian aktif','active purchases'],
+      ['Periksa ulang pembelian','Check purchase again'],
+      ['Memeriksa status','Checking status'],
+      ['GRATIS','FREE'],['PREMIUM','PREMIUM'],
+      ['Server Play API','Google Play server API'],
+      ['PREMIUM terverifikasi','PREMIUM verified'],
+      ['akses Ads-Free tidak valid','Ads-Free access is not valid'],
+      ['Iklan aktif','Ads enabled'],['Iklan nonaktif','Ads disabled'],
+      ['Banner atas','Top banner'],['Banner bawah','Bottom banner'],
+      ['siap','ready'],['tidak siap','not ready'],
+      ['Google Play lokal aktif','Local Google Play purchase active'],
+      ['Pembelian','Purchase'],['Diverifikasi','Verified'],
+      ['Tidak ada','None'],['tidak tersedia','unavailable'],
+      ['Pembelian tidak ditemukan','Purchase not found'],
+      ['Status iklan','Ad status']
+    ];
+    let text=raw;
+    for(const [a,b] of replacements)text=text.split(a).join(b);
+    return text;
+  }
   function mount(){
     const content=document.getElementById('content');
     if(!content || !window.state && typeof state==='undefined')return;
@@ -1801,21 +1836,21 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
     section.className='card settings-card';
     section.id='billing-qa-panel';
     section.style.cssText='margin:12px 0 18px;padding:16px;';
-    section.innerHTML='<h3 style="margin:0 0 10px">Status Iklan &amp; Pembelian</h3>'+
+    section.innerHTML='<h3 style="margin:0 0 10px">'+bilingual('Status Iklan & Pembelian','Ads & Purchase Status')+'</h3>'+
       '<p style="font-size:11px;opacity:.75;margin-bottom:8px">'+MARK+'</p>'+
-      '<p id="billing-qa-text" style="font-size:13px;overflow-wrap:anywhere;white-space:pre-line">Memeriksa status...</p>'+
-      '<button class="btn" id="billing-qa-refresh" type="button" style="min-height:42px">Periksa ulang pembelian</button>';
+      '<p id="billing-qa-text" style="font-size:13px;overflow-wrap:anywhere;white-space:pre-line">'+bilingual('Memeriksa status...','Checking status...')+'</p>'+
+      '<button class="btn" id="billing-qa-refresh" type="button" style="min-height:42px">'+bilingual('Periksa ulang pembelian','Check purchase again')+'</button>';
     content.appendChild(section);
     update();
   }
   function update(){
     const el=document.getElementById('billing-qa-text');if(!el)return;
-    try{el.textContent=window.AlHikamAndroid?.monetizationStatus?.()||'Diagnostik tersedia di aplikasi Android.';}
-    catch(e){el.textContent='Gagal membaca status: '+String(e);}
+    try{el.textContent=localizeDiagnostics(window.AlHikamAndroid?.monetizationStatus?.()||bilingual('Diagnostik tersedia di aplikasi Android.','Diagnostics are available in the Android app.'));}
+    catch(e){el.textContent=bilingual('Gagal membaca status: ','Unable to read status: ')+String(e);}
   }
   document.addEventListener('click',function(e){
     if(e.target.closest('#billing-qa-refresh')){
-      const status=document.getElementById('billing-qa-text');if(status)status.textContent='Meminta pemeriksaan Google Play...';
+      const status=document.getElementById('billing-qa-text');if(status)status.textContent=bilingual('Meminta pemeriksaan Google Play...','Requesting Google Play verification...');
       window.AlHikamAndroid?.restoreAdsFree?.();
       setTimeout(update,1600);
       setTimeout(update,4000);
