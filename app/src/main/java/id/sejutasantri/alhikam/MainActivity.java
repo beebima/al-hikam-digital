@@ -33,9 +33,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 public class MainActivity extends Activity {
  private static final String REMOVE_ADS_ID="remove_ads_lifetime";
  private BillingClient billingClient;
- // HTTPS endpoint. Cloud Run is currently IAM-private, so Android will initially receive
- // 401/403. Network errors NEVER revoke an existing purchase. Public access must only
- // be enabled with server-side purchase validation and appropriate abuse protections.
+ // Firebase-authenticated HTTPS endpoint. Server validates Firebase ID token and Google Play purchase.
+ // Network errors do not revoke an existing purchase.
  private static final String VERIFY_URL="https://sejutasantri-billing-verifier-654659401534.asia-southeast2.run.app/verify";
  private FirebaseAuth firebaseAuth=null;
  private volatile String firebaseSetup="Firebase belum dikonfigurasi";
@@ -74,6 +73,28 @@ public class MainActivity extends Activity {
        verifyPurchaseWithIdToken(purchaseToken,task.getResult().getToken());
      else purchaseDiagnostic="Google Play lokal aktif; token Firebase tidak tersedia";
    });
+ }
+ // Foreground reconciliation every 9 minutes while open.
+ // Background reconciliation handled separately by PeriodicWorkRequest every 3 hours (best effort).
+ private static final long PURCHASE_CHECK_INTERVAL_MS=9L*60L*1000L;
+ private final Handler billingRefreshHandler=new Handler(Looper.getMainLooper());
+ private volatile long lastAutoPurchaseCheckAt=0L;
+ private boolean billingForeground=false;
+ private final Runnable foregroundBillingRefresh=new Runnable(){
+   @Override public void run(){
+     if(!billingForeground)return;
+     long now=System.currentTimeMillis();
+     if(billingClient!=null && billingClient.isReady() && now-lastAutoPurchaseCheckAt>=PURCHASE_CHECK_INTERVAL_MS)
+       refreshPurchases(false);
+     scheduleForegroundBillingRefresh();
+   }
+ };
+ private void scheduleForegroundBillingRefresh(){
+   billingRefreshHandler.removeCallbacks(foregroundBillingRefresh);
+   if(!billingForeground)return;
+   long elapsed=System.currentTimeMillis()-lastAutoPurchaseCheckAt;
+   long delay=lastAutoPurchaseCheckAt==0L?PURCHASE_CHECK_INTERVAL_MS:Math.max(1000L,PURCHASE_CHECK_INTERVAL_MS-elapsed);
+   billingRefreshHandler.postDelayed(foregroundBillingRefresh,delay);
  }
  private volatile String deniedPurchaseToken=null;
  private volatile String lastVerificationToken=null;
@@ -139,6 +160,10 @@ public class MainActivity extends Activity {
    }
    if(purchaseLookupInProgress){if(userRequested)billingNotice("Pemeriksaan pembelian sedang berlangsung. Coba sebentar lagi.");return;}
    purchaseLookupInProgress=true;
+   // On each real Play Billing query, advance the foreground-only refresh clock.
+   lastAutoPurchaseCheckAt=System.currentTimeMillis();
+   if(billingForeground)scheduleForegroundBillingRefresh();
+   if(userRequested)lastSuccessfulVerificationAt=0L;
    QueryPurchasesParams params=QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build();
    billingClient.queryPurchasesAsync(params,(result,purchases)->{
      purchaseLookupInProgress=false;
@@ -191,8 +216,10 @@ public class MainActivity extends Activity {
   */
  private void verifyPurchaseWithIdToken(String token,String idToken){
    if(token==null || token.length()<8) return;
-   if(token.equals(deniedPurchaseToken)) return;
-   if(token.equals(lastVerificationToken) && System.currentTimeMillis()-lastSuccessfulVerificationAt<600000L)return;
+   // A previously denied token MUST be rechecked: refunds may be reversed or entitlement restored.
+   // Avoid repeated API calls between foreground checks, but never cache a denial forever.
+   if(token.equals(lastVerificationToken) && lastSuccessfulVerificationAt>0L &&
+       System.currentTimeMillis()-lastSuccessfulVerificationAt<PURCHASE_CHECK_INTERVAL_MS)return;
    if(verificationInFlight && token.equals(lastVerificationToken)) return;
    verificationInFlight=true;
    lastVerificationToken=token;
@@ -392,6 +419,7 @@ public class MainActivity extends Activity {
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
   initFirebaseBilling();
+  BackgroundBillingWorker.schedule(this);
   startBilling();
   // Inisialisasi SDK saja. TIDAK meminta iklan aktif pada tahap ini.
   // Consent pengguna harus disiapkan sebelum pemuatan iklan nyata.
@@ -544,8 +572,33 @@ public class MainActivity extends Activity {
   if(req==NOTIFICATION_REQUEST && results.length>0 && results[0]==PackageManager.PERMISSION_GRANTED)
    ReminderScheduler.schedule(this);
  }
- @Override protected void onPause(){if(bottomBanner!=null)bottomBanner.pause();if(topBanner!=null)topBanner.pause();super.onPause();}
- @Override protected void onResume(){super.onResume();if(billingClient!=null && billingClient.isReady())refreshPurchases(false);if(!adsFree && adsSdkReady){loadTopBanner();loadBottomBanner();}if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();}
- @Override protected void onDestroy(){if(billingClient!=null){billingClient.endConnection();billingClient=null;}if(topBanner!=null){topBanner.destroy();topBanner=null;}if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
+ @Override protected void onPause(){
+   billingForeground=false;
+   getSharedPreferences("billing_background",MODE_PRIVATE).edit().putBoolean("visible",false).apply();
+   billingRefreshHandler.removeCallbacks(foregroundBillingRefresh);
+   if(bottomBanner!=null)bottomBanner.pause();if(topBanner!=null)topBanner.pause();super.onPause();
+ }
+ @Override protected void onResume(){
+   super.onResume();
+   billingForeground=true;
+   getSharedPreferences("billing_background",MODE_PRIVATE).edit().putBoolean("visible",true).putLong("visibleAt",System.currentTimeMillis()).apply();
+   // A fresh launch triggers the normal startBilling() check; returning after 3 hours rechecks.
+   if(billingClient!=null && billingClient.isReady() &&
+      (lastAutoPurchaseCheckAt==0L || System.currentTimeMillis()-lastAutoPurchaseCheckAt>=PURCHASE_CHECK_INTERVAL_MS ||
+       getSharedPreferences("billing_background",MODE_PRIVATE).getLong("checkedAt",0L)>lastAutoPurchaseCheckAt))
+     refreshPurchases(false);
+   scheduleForegroundBillingRefresh();
+   if(!adsFree && adsSdkReady){loadTopBanner();loadBottomBanner();}
+   if(bottomBanner!=null)bottomBanner.resume();if(topBanner!=null)topBanner.resume();
+ }
+ @Override protected void onDestroy(){
+   billingForeground=false;
+   getSharedPreferences("billing_background",MODE_PRIVATE).edit().putBoolean("visible",false).apply();
+   billingRefreshHandler.removeCallbacks(foregroundBillingRefresh);
+   if(billingClient!=null){billingClient.endConnection();billingClient=null;}
+   if(topBanner!=null){topBanner.destroy();topBanner=null;}
+   if(bottomBanner!=null){bottomBanner.destroy();bottomBanner=null;}
+   if(web!=null){web.destroy();web=null;}super.onDestroy();
+ }
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }

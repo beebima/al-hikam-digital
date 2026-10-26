@@ -1,0 +1,7 @@
+REVISI CODE 14 - versionCode 14 / versionName v.1.1.14 (tetap)
+1. Foreground: query Billing setiap 9 menit saat Activity aktif, juga onResume jika sudah jatuh tempo.
+2. Background: WorkManager 3 jam, dengan NetworkType.CONNECTED. Android dapat menunda jadwal karena Doze/baterai. Worker memeriksa purchase token via Firebase ID token + server Play API dan menyimpan ringkasan status tanpa token; aplikasi menyelaraskan UI setelah dibuka.
+3. Bottom menu: tambah bidang hijau 2px atas dan 3px bawah, bukan spacer.
+4. Settings: panel Status Iklan & Pembelian setelah Font Konten.
+5. About: kartu Privasi dan penyimpanan dihapus.
+Build ZIP integrity checked; kompilasi GitHub Actions tetap perlu diuji sebelum upload Play.

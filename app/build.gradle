@@ -6,8 +6,8 @@ android {
         applicationId 'id.sejutasantri.alhikam'
         minSdk 24
         targetSdk 36
-        versionCode 13
-        versionName 'v.1.1.13'
+        versionCode 14
+        versionName 'v.1.1.14'
     }
     signingConfigs {
         playUpload {
@@ -38,4 +38,5 @@ dependencies {
     implementation 'com.android.billingclient:billing:9.1.0'
     implementation platform('com.google.firebase:firebase-bom:34.12.0')
     implementation 'com.google.firebase:firebase-auth'
+    implementation 'androidx.work:work-runtime:2.10.5'
 }

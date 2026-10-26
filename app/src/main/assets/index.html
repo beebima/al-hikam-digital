@@ -899,6 +899,17 @@ html.android-native .top .lang-picker{
 html.android-native .top .theme-toggle svg{width:19px!important;height:19px!important;display:block!important;stroke:currentColor!important;fill:none!important}
 html.android-native .top #autohide-toggle.enabled{color:var(--royal-chrome-fg)!important;box-shadow:inset 0 0 0 1px var(--royal-chrome-fg)!important}
 @media(max-width:360px){html.android-native .top{padding-left:8px!important;padding-right:8px!important}html.android-native .top .brand{font-size:14px!important}html.android-native .top .brand .ar{font-size:17px!important}}
+
+/* Code 14 revision: extra 2px top and 3px bottom belong to the GREEN navigation itself.
+   Keep its bottom anchored above the native AdMob banner; no white/transparent gap. */
+html.android-native .nav,html.android-native body .nav,html.android-native body.dark .nav{
+ padding-top:5px!important; padding-bottom:7px!important;
+ margin:0!important; background:#304634!important;
+ box-sizing:border-box!important;
+}
+html.android-native .shell{padding-bottom:calc(76px + var(--native-banner-height,0px))!important}
+html.android-native:not(.native-banner-ready) .shell{padding-bottom:76px!important}
+html.ads-free-entitled.android-native .shell{padding-bottom:76px!important}
 </style><style>
 /* 1.1.1: smooth bottom auto-hide; keep fixed ads anchored. */
 html.android-native .nav,html.android-native body .nav,html.android-native body.dark .nav{
@@ -1455,7 +1466,7 @@ body .no-ads-card .premium-badge{display:none!important}
   <rect class="fil2" x="2043.36" y="18459.17" width="11091.84" height="5545.92"/>
  </g>
 </svg>
-</div><h2>${tr('Sejuta Santri Apps','Sejuta Santri Apps')}</h2><p>${tr('Inisiatif pengembangan aplikasi pendidikan Islam oleh Gus Bee Al-Imarah bersama tim Masjid Sejuta Santri. Berangkat dari semangat menjadikan teknologi sebagai sarana belajar, memahami ajaran Islam, dan menghadirkan manfaat yang dapat dijangkau lebih luas.','An Islamic educational app initiative founded by Gus Bee Al-Imarah together with the Masjid Sejuta Santri team. Its mission is to use technology to support Islamic learning, deeper understanding, and wider access to beneficial knowledge.')}</p></div><div class="card"><h2>${tr('Privasi dan penyimpanan','Privacy and storage')}</h2><p>${tr('Saat ini, catatan, bookmark, dan progres membaca tersimpan secara lokal di browser/perangkat. Belum ada sinkronisasi akun.','Currently, notes, bookmarks, and reading progress are stored locally in your browser/device. Account synchronization is not yet available.')}</p><p class="sub">Al-Hikam Digital · V 0.64</p></div><div class="card"><strong>${tr('Masjid Sejuta Santri · Yogyakarta, DIY, Indonesia','Masjid Sejuta Santri · Yogyakarta, Indonesia')}</strong><div class="social-row"><a href="https://www.instagram.com/masjidsejutasantri/" target="_blank" rel="noopener noreferrer">◎ Instagram · @masjidsejutasantri</a><a href="https://www.youtube.com/@SejutaSantri" target="_blank" rel="noopener noreferrer">▶ YouTube · @SejutaSantri</a></div></div>`}
+</div><h2>${tr('Sejuta Santri Apps','Sejuta Santri Apps')}</h2><p>${tr('Inisiatif pengembangan aplikasi pendidikan Islam oleh Gus Bee Al-Imarah bersama tim Masjid Sejuta Santri. Berangkat dari semangat menjadikan teknologi sebagai sarana belajar, memahami ajaran Islam, dan menghadirkan manfaat yang dapat dijangkau lebih luas.','An Islamic educational app initiative founded by Gus Bee Al-Imarah together with the Masjid Sejuta Santri team. Its mission is to use technology to support Islamic learning, deeper understanding, and wider access to beneficial knowledge.')}</p></div><div class="card"><strong>${tr('Masjid Sejuta Santri · Yogyakarta, DIY, Indonesia','Masjid Sejuta Santri · Yogyakarta, Indonesia')}</strong><div class="social-row"><a href="https://www.instagram.com/masjidsejutasantri/" target="_blank" rel="noopener noreferrer">◎ Instagram · @masjidsejutasantri</a><a href="https://www.youtube.com/@SejutaSantri" target="_blank" rel="noopener noreferrer">▶ YouTube · @SejutaSantri</a></div></div>`}
 function searchView(){return `<h1 class="title">${tr('Cari Hikmah','Search Wisdoms')}</h1><input class="search" id="query" type="search" autocomplete="off" placeholder="${tr('Contoh: tawakal, amal, takdir...','Try: deeds, hope, decree...')}" aria-label="${tr('Cari teks','Search text')}"><p class="sub" id="hint">${tr('Cari berdasarkan teks Arab, terjemah, atau tema.','Search Arabic text, translations, or topics.')}</p><div id="results"></div>`}function norm(s){return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f\u064b-\u065f]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').trim()}function distance(a,b){let p=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){let q=[i];for(let j=1;j<=b.length;j++)q[j]=Math.min(q[j-1]+1,p[j]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=q}return p[b.length]}function runSearch(q){let needle=norm(q),found=data.filter(d=>norm([d.title,d.en,d.arab,d.translation,d.english,...d.tags,...d.phrases.flat()].join(' ')).includes(needle));let suggestion='';if(needle&&!found.length){let vocab=[...new Set(data.flatMap(d=>[...d.tags,...d.title.toLowerCase().split(' '),...d.en.toLowerCase().split(' ')]))].filter(w=>w.length>2);let best=vocab.map(w=>({w,dist:distance(needle,norm(w))})).sort((a,b)=>a.dist-b.dist)[0];if(best&&best.dist<=Math.max(2,Math.floor(needle.length*.35)))suggestion=best.w} $('results').innerHTML=found.length?found.map(item).join(''):`<p class="muted">${tr('Tidak ditemukan.','No matches.')}</p>`;$('hint').innerHTML=suggestion?`${tr('Mungkin maksud Anda:','Did you mean:')} <button class="btn" id="suggest">${esc(suggestion)}</button>`:'';if(suggestion)$('suggest').onclick=()=>{$('query').value=suggestion;runSearch(suggestion)};wireOpen()}function wireOpen(){document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openBook(Number(b.dataset.open)))}
 const fontOptions=[['naskh','Naskh · Noto Naskh / Georgia'],['amiri','Amiri · Traditional'],['serif','Serif · Georgia'],['sans','Sans · Noto Sans / Arial'],['classic','Classic · Times New Roman']];
 function applyReadingPrefs(){state.fontSize=Math.max(10,Math.min(32,Number(state.fontSize)||14));state.systemFontSize=Math.max(10,Math.min(32,Number(state.systemFontSize)||14));document.documentElement.style.setProperty('--reader-font-size',(Number(state.fontSize) || 12)+'px');document.documentElement.dataset.readingFont=state.fontFamily||'naskh';document.documentElement.style.setProperty('--system-font-size',(Number(state.systemFontSize) || 12)+'px');document.documentElement.dataset.systemFont=state.systemFontFamily||'system'}
@@ -1781,7 +1792,7 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
 /* Billing diagnostic panel is inserted into the real Settings DOM after rendering.
    No function wrapping, so it works with the GoldenWisdom UI renderer. */
 (function(){
-  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 13';
+  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 14';
   function mount(){
     const content=document.getElementById('content');
     if(!content || !window.state && typeof state==='undefined')return;
@@ -1794,7 +1805,7 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
       '<p style="font-size:11px;opacity:.75;margin-bottom:8px">'+MARK+'</p>'+
       '<p id="billing-qa-text" style="font-size:13px;overflow-wrap:anywhere;white-space:pre-line">Memeriksa status...</p>'+
       '<button class="btn" id="billing-qa-refresh" type="button" style="min-height:42px">Periksa ulang pembelian</button>';
-    content.insertBefore(section,content.firstChild.nextSibling);
+    content.appendChild(section);
     update();
   }
   function update(){

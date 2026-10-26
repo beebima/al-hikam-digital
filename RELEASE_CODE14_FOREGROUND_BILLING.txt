@@ -1,0 +1,13 @@
+Al-Hikam Digital / GoldenWisdom V3.4.6 - Code 14 (v.1.1.14)
+
+BASELINE: Code 13 FirebaseConfigured BuildFix (successful Github APK build)
+CHANGE: Google Play Billing reconciliation is initiated at app start (upon BillingClient ready), after returning to foreground if 3+ hours elapsed since most recent Play query, and every 3 hours while the Activity remains on screen.
+When app is paused the in-process timer is canceled; NO new background task, AlarmManager, or WorkManager was introduced.
+Server-side verify of an existing token is no longer skipped forever when previously denied; a fresh Play query after the 3-hour interval can trigger re-verification.
+Manual 'Periksa ulang pembelian' refreshes even within 3 hours.
+Premium fallback on network errors unchanged; no backend changes required.
+Banner positions/AdMob, interstitial, GoldenWisdom appearance and navigation are unchanged.
+
+IMPORTANT: local device timestamps are runtime process state (not persisted); every cold launch re-checks Play. Server validation is still required to make final entitlement decision. Existing Firebase Auth service and public Cloud Run must be configured as tested.
+
+Build not executed locally (no Gradle wrapper available in source). Run Github Actions APK build first; then AAB workflow for internal testing.
