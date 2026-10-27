@@ -1166,6 +1166,23 @@ body #skyline-hero.simple-wisdom-card .skyline-quote-btn{
  min-width:28px!important;min-height:28px!important;padding:0!important;
 }
 </style>
+
+<style id="code19-home-chrome">
+/* Home menu independent of Auto-hide: 1s entry delay, 420ms animation. */
+body.home-dashboard .shell > .top,
+body.home-dashboard .nav{
+  transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease!important;
+}
+body.home-dashboard.home-chrome-hidden .shell > .top,
+body.home-dashboard.home-chrome-hidden .top{
+  transform:translateY(calc(-100% - 24px))!important;
+  opacity:0!important;pointer-events:none!important;
+}
+body.home-dashboard.home-chrome-hidden .nav{
+  transform:translateY(calc(100% + 5px))!important;
+  opacity:0!important;pointer-events:none!important;
+}
+</style>
 </head><body><script>if(window.AlHikamAndroid)document.documentElement.classList.add('android-native');</script><div class="ambient-ornaments" aria-hidden="true"><span class="orn">✧</span><span class="orn">✦</span><span class="orn">❋</span><span class="orn">✧</span><span class="orn">✦</span><span class="orn">✧</span></div><script>/* Apply saved theme before the splash is painted. */
 try{const saved=JSON.parse(localStorage.getItem('alhikam-v02-state')||'{}');if(saved.theme==='dark')document.body.classList.add('dark')}catch(e){}
 </script><div class="splash" id="splash" aria-label="Memuat aplikasi"><div class="splash-center"><div class="splash-logo" lang="ar">الحكم</div><div class="brand">Al-Hikam Digital</div><div class="splash-line"><span></span></div><small id="loading-label">Menyiapkan ruang hikmah...</small></div><div class="splash-brand" aria-label="Sejuta Santri"><svg role="img" aria-label="Logo Sejuta Santri" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="320" height="160" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
@@ -1324,7 +1341,7 @@ function maybeShowInterstitial(next){
 }
 
 function shortcutOpen(key){if(key==='auto'){document.getElementById('autohide-toggle')?.click();render();return}if(key==='dark'){document.getElementById('theme-toggle')?.click();render();document.body.classList.toggle('home-dashboard',state.tab==='home'&&!tutorialActive);return}if(key==='lang'){document.getElementById('header-language')?.click();return}if(key==='short'||key==='talk'){state.sermonKind=key==='talk'?'talk':'short';state.sermonSelected=null;save();go('academy');return}go(key)}
-function go(tab){if(tab!==state.tab && maybeShowInterstitial(()=>go(tab)))return;document.body.classList.remove('chrome-hidden');const changed=tab!==state.tab;state.tab=tab;if(tab==='book')state.bookDetail=false;save();render();scheduleMenuHide();if(changed){const pane=$('content');pane.classList.remove('tab-enter');void pane.offsetWidth;pane.classList.add('tab-enter');pane.addEventListener('animationend',()=>pane.classList.remove('tab-enter'),{once:true})}scrollTo(0,0)}function openBook(id){if(state.bookDetail && state.tab==='book' && Number(id)!==Number(state.current) && maybeShowInterstitial(()=>openBook(id)))return;document.body.classList.remove('chrome-hidden');state.current=id;state.lastRead=id;state.tab='book';state.bookDetail=true;save();render();scrollTo(0,0)}function completedLabel(id){if(!state.completed.includes(id))return tr('Belum selesai','Not completed');const stamp=state.completedAt?.[id];if(!stamp)return '✅ '+tr('Selesai','Completed');const date=new Date(stamp);if(Number.isNaN(date.getTime()))return '✅ '+tr('Selesai','Completed');const weekday=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{weekday:'long'}).format(date);const datePart=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).format(date);const clock=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(date);return '✅ '+tr('Selesai','Completed')+' - '+weekday+' '+datePart+' '+clock;}function item(d){return `<div class="card row"><div><div class="eyebrow">${tr('Hikmah','Wisdom')} ${String(d.id).padStart(2,'0')}</div><strong>${esc(tr(d.title,d.en))}</strong><div class="sub">${completedLabel(d.id)}</div></div><button class="btn" data-open="${d.id}">${tr('Baca','Read')} →</button></div>`}const ANALYTICS_RANGE_KEY='alhikam-analytics-range-v1';
+function go(tab){if(tab!==state.tab && maybeShowInterstitial(()=>go(tab)))return;document.body.classList.remove('chrome-hidden');const changed=tab!==state.tab;state.tab=tab;if(tab==='book')state.bookDetail=false;save();render();syncHomeChrome();scheduleMenuHide();if(changed){const pane=$('content');pane.classList.remove('tab-enter');void pane.offsetWidth;pane.classList.add('tab-enter');pane.addEventListener('animationend',()=>pane.classList.remove('tab-enter'),{once:true})}scrollTo(0,0)}function openBook(id){if(state.bookDetail && state.tab==='book' && Number(id)!==Number(state.current) && maybeShowInterstitial(()=>openBook(id)))return;document.body.classList.remove('chrome-hidden');state.current=id;state.lastRead=id;state.tab='book';state.bookDetail=true;save();render();scrollTo(0,0)}function completedLabel(id){if(!state.completed.includes(id))return tr('Belum selesai','Not completed');const stamp=state.completedAt?.[id];if(!stamp)return '✅ '+tr('Selesai','Completed');const date=new Date(stamp);if(Number.isNaN(date.getTime()))return '✅ '+tr('Selesai','Completed');const weekday=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{weekday:'long'}).format(date);const datePart=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).format(date);const clock=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(date);return '✅ '+tr('Selesai','Completed')+' - '+weekday+' '+datePart+' '+clock;}function item(d){return `<div class="card row"><div><div class="eyebrow">${tr('Hikmah','Wisdom')} ${String(d.id).padStart(2,'0')}</div><strong>${esc(tr(d.title,d.en))}</strong><div class="sub">${completedLabel(d.id)}</div></div><button class="btn" data-open="${d.id}">${tr('Baca','Read')} →</button></div>`}const ANALYTICS_RANGE_KEY='alhikam-analytics-range-v1';
 const ANALYTICS_FIRST_SEEN_KEY='alhikam-first-seen-v1';
 let analyticsRange='7d';
 try{const r=localStorage.getItem(ANALYTICS_RANGE_KEY);if(['7d','30d','1y','all'].includes(r))analyticsRange=r;if(!localStorage.getItem(ANALYTICS_FIRST_SEEN_KEY))localStorage.setItem(ANALYTICS_FIRST_SEEN_KEY,new Date().toISOString())}catch{}
@@ -1635,16 +1652,33 @@ document.addEventListener('visibilitychange',()=>{quoteAutoLast=Date.now();if(!d
 // or after a completed pointer interaction, with the idle countdown restarted.
 let tutorialActive=false,tourIndex=0;
 let chromeIdleTimer;
+let homeChromeTimer=null;
+function syncHomeChrome(){
+  const home=state.tab==='home'&&!tutorialActive;
+  if(!home){
+    clearTimeout(homeChromeTimer);homeChromeTimer=null;
+    document.body.classList.remove('home-chrome-hidden');
+    return;
+  }
+  if(homeChromeTimer!==null||document.body.classList.contains('home-chrome-hidden'))return;
+  homeChromeTimer=setTimeout(()=>{
+    homeChromeTimer=null;
+    if(state.tab==='home'&&!tutorialActive)
+      document.body.classList.add('home-chrome-hidden');
+  },1000);
+}
 function revealMenus(){
+  if(state.tab==='home'){syncHomeChrome();return;}
   clearTimeout(chromeIdleTimer);
   if(!teleRunning)document.body.classList.remove('chrome-hidden');
   scheduleMenuHide();
 }
 function scheduleMenuHide(){
   clearTimeout(chromeIdleTimer);
-  if(!(state.autoHide||state.tab==='home')||teleRunning||tutorialActive||document.hidden)return;
+  if(state.tab==='home'){syncHomeChrome();return;}
+  if(!state.autoHide||teleRunning||tutorialActive||document.hidden)return;
   chromeIdleTimer=setTimeout(()=>{
-    if(!(state.autoHide||state.tab==='home')||teleRunning||tutorialActive||document.hidden)return;
+    if(!state.autoHide||state.tab==='home'||teleRunning||tutorialActive||document.hidden)return;
     const focused=document.activeElement;
     if(focused&&focused.matches('input,textarea,select,[contenteditable="true"]')){
       scheduleMenuHide();return;
@@ -1720,7 +1754,7 @@ $('autohide-toggle').onclick=()=>{
   syncAutoHide();
 };
 $('theme-toggle').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';save();applyTheme()};applyTheme();syncSplashLanguage();
-render();syncMockAdLanguage();syncAutoHide();setTimeout(()=>{$('splash').classList.add('done');setTimeout(()=>{$('splash').remove();const t=colorThemes.find(t=>t.id===state.colorTheme)||colorThemes[0];syncAndroidSystemBars(t.light.ink,false)},450)},3000);
+render();syncMockAdLanguage();syncAutoHide();syncHomeChrome();setTimeout(()=>{$('splash').classList.add('done');setTimeout(()=>{$('splash').remove();const t=colorThemes.find(t=>t.id===state.colorTheme)||colorThemes[0];syncAndroidSystemBars(t.light.ink,false)},450)},3000);
 
 
 const tourSteps=[
@@ -1735,11 +1769,11 @@ const tourSteps=[
  {target:'#header-language',id:['Pilihan bahasa','Language selection'],desc:['Ketuk ikon bendera untuk memilih bahasa Indonesia atau Inggris. Bahasa aplikasi dan konten bilingual akan mengikuti pilihanmu.','Tap the flag icon to switch between Indonesian and English. The app interface and bilingual content will follow your choice.']},
  {target:'.wisdom-shortcuts',id:['Beranda — pusat aktivitasmu','Home — your activity center'],desc:['Semua yang dibutuhkan ada di Beranda: sembilan shortcut, renungan, progres belajar, tutorial, bacaan terakhir, dan bebas iklan.','Everything you need is on Home: nine shortcuts, reflections, progress, tutorial, recent reading, and ad-free access.']}
 ];
-function finishTutorial(){tutorialActive=false;clearTimeout(tourTransitionTimer);localStorage.setItem('alhikam-tutorial-seen-v1','1');const o=$('tour-overlay');if(o)o.remove();document.body.classList.toggle('home-dashboard',state.tab==='home');revealMenus()}
+function finishTutorial(){tutorialActive=false;clearTimeout(tourTransitionTimer);localStorage.setItem('alhikam-tutorial-seen-v1','1');const o=$('tour-overlay');if(o)o.remove();document.body.classList.toggle('home-dashboard',state.tab==='home');syncHomeChrome();revealMenus()}
 let tourTransitionTimer=null;
 function advanceTour(){if(!tutorialActive||tourTransitionTimer!==null)return;const b=document.querySelector('#tour-overlay .tour-balloon');if(!b)return;b.classList.add('tour-fading');tourTransitionTimer=setTimeout(()=>{tourTransitionTimer=null;if(!tutorialActive)return;tourIndex++;showTourStep(true)},240)}
 function showTourStep(animateIn=false){const o=$('tour-overlay');if(!o)return;const step=tourSteps[tourIndex];if(tourIndex===tourSteps.length-1 && state.tab!=='home'){state.tab='home';save();render();scrollTo(0,0)}const target=document.querySelector(step.target);if(!target){finishTutorial();return}document.body.classList.remove('chrome-hidden');document.body.classList.remove('home-dashboard');const r=target.getBoundingClientRect();const h=o.querySelector('.tour-highlight'),b=o.querySelector('.tour-balloon');if(animateIn)b.classList.add('tour-entering');else b.classList.remove('tour-fading','tour-entering');h.style.cssText=`top:${Math.max(0,r.top)}px;left:${Math.max(0,r.left)}px;width:${r.width}px;height:${r.height}px`;b.innerHTML=`<div class="tour-counter">${tourIndex+1} / ${tourSteps.length}</div><strong>${esc(step.id[state.lang==='id'?0:1])}</strong><p>${esc(step.desc[state.lang==='id'?0:1])}</p><div class="tour-actions"><button class="tour-skip" id="tour-skip">${tr('Lewati tutorial','Skip tutorial')}</button><button id="tour-next">${tourIndex===tourSteps.length-1?tr('Masuk ke Beranda →','Enter Home →'):tr('Berikutnya →','Next →')}</button></div>`;const isBottomNav=!!target.closest('.nav');b.classList.toggle('below-nav',isBottomNav);const bh=b.getBoundingClientRect().height;let top=isBottomNav?r.top-bh-22:r.bottom+22;if(top+bh>innerHeight-12)top=r.top-bh-22;if(top<12)top=12;b.style.top=top+'px';b.style.left=Math.min(innerWidth-b.offsetWidth-14,Math.max(14,r.left))+'px';$('tour-skip').onclick=finishTutorial;$('tour-next').onclick=()=>{if(tourIndex===tourSteps.length-1)finishTutorial();else advanceTour()};if(animateIn)requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.remove('tour-fading','tour-entering')))}
-function startTutorial(){clearTimeout(tourTransitionTimer);tourTransitionTimer=null;if(teleRunning)stopTele();tutorialActive=true;tourIndex=0;document.body.classList.remove('home-dashboard');clearTimeout(chromeIdleTimer);document.body.classList.remove('chrome-hidden');let o=$('tour-overlay');if(!o){o=document.createElement('div');o.id='tour-overlay';o.className='tour-overlay';o.innerHTML='<div class="tour-highlight"></div><div class="tour-balloon" role="dialog" aria-modal="true" aria-label="Tutorial"></div>';document.body.appendChild(o)}o.classList.add('active');showTourStep()}
+function startTutorial(){clearTimeout(tourTransitionTimer);tourTransitionTimer=null;if(teleRunning)stopTele();tutorialActive=true;tourIndex=0;document.body.classList.remove('home-dashboard');syncHomeChrome();clearTimeout(chromeIdleTimer);document.body.classList.remove('chrome-hidden');let o=$('tour-overlay');if(!o){o=document.createElement('div');o.id='tour-overlay';o.className='tour-overlay';o.innerHTML='<div class="tour-highlight"></div><div class="tour-balloon" role="dialog" aria-modal="true" aria-label="Tutorial"></div>';document.body.appendChild(o)}o.classList.add('active');showTourStep()}
 window.addEventListener('resize',()=>{if(tutorialActive)showTourStep()});
 // Android first-run onboarding; do not restart once skipped or completed.
 if(window.AlHikamAndroid && localStorage.getItem('alhikam-tutorial-seen-v1')!=='1'){
@@ -1802,7 +1836,7 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
 /* Billing diagnostic panel is inserted into the real Settings DOM after rendering.
    No function wrapping, so it works with the GoldenWisdom UI renderer. */
 (function(){
-  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 18';
+  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 19';
   const en=()=>state.lang==='en';
   const bilingual=(id,english)=>en()?english:id;
   function localizeDiagnostics(raw){
