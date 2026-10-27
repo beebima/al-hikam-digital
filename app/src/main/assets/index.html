@@ -1324,7 +1324,7 @@ function maybeShowInterstitial(next){
 }
 
 function shortcutOpen(key){if(key==='auto'){document.getElementById('autohide-toggle')?.click();render();return}if(key==='dark'){document.getElementById('theme-toggle')?.click();render();document.body.classList.toggle('home-dashboard',state.tab==='home'&&!tutorialActive);return}if(key==='lang'){document.getElementById('header-language')?.click();return}if(key==='short'||key==='talk'){state.sermonKind=key==='talk'?'talk':'short';state.sermonSelected=null;save();go('academy');return}go(key)}
-function go(tab){if(tab!==state.tab && maybeShowInterstitial(()=>go(tab)))return;document.body.classList.remove('chrome-hidden');const changed=tab!==state.tab;state.tab=tab;if(tab==='book')state.bookDetail=false;save();render();if(changed){const pane=$('content');pane.classList.remove('tab-enter');void pane.offsetWidth;pane.classList.add('tab-enter');pane.addEventListener('animationend',()=>pane.classList.remove('tab-enter'),{once:true})}scrollTo(0,0)}function openBook(id){if(state.bookDetail && state.tab==='book' && Number(id)!==Number(state.current) && maybeShowInterstitial(()=>openBook(id)))return;document.body.classList.remove('chrome-hidden');state.current=id;state.lastRead=id;state.tab='book';state.bookDetail=true;save();render();scrollTo(0,0)}function completedLabel(id){if(!state.completed.includes(id))return tr('Belum selesai','Not completed');const stamp=state.completedAt?.[id];if(!stamp)return '✅ '+tr('Selesai','Completed');const date=new Date(stamp);if(Number.isNaN(date.getTime()))return '✅ '+tr('Selesai','Completed');const weekday=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{weekday:'long'}).format(date);const datePart=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).format(date);const clock=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(date);return '✅ '+tr('Selesai','Completed')+' - '+weekday+' '+datePart+' '+clock;}function item(d){return `<div class="card row"><div><div class="eyebrow">${tr('Hikmah','Wisdom')} ${String(d.id).padStart(2,'0')}</div><strong>${esc(tr(d.title,d.en))}</strong><div class="sub">${completedLabel(d.id)}</div></div><button class="btn" data-open="${d.id}">${tr('Baca','Read')} →</button></div>`}const ANALYTICS_RANGE_KEY='alhikam-analytics-range-v1';
+function go(tab){if(tab!==state.tab && maybeShowInterstitial(()=>go(tab)))return;document.body.classList.remove('chrome-hidden');const changed=tab!==state.tab;state.tab=tab;if(tab==='book')state.bookDetail=false;save();render();scheduleMenuHide();if(changed){const pane=$('content');pane.classList.remove('tab-enter');void pane.offsetWidth;pane.classList.add('tab-enter');pane.addEventListener('animationend',()=>pane.classList.remove('tab-enter'),{once:true})}scrollTo(0,0)}function openBook(id){if(state.bookDetail && state.tab==='book' && Number(id)!==Number(state.current) && maybeShowInterstitial(()=>openBook(id)))return;document.body.classList.remove('chrome-hidden');state.current=id;state.lastRead=id;state.tab='book';state.bookDetail=true;save();render();scrollTo(0,0)}function completedLabel(id){if(!state.completed.includes(id))return tr('Belum selesai','Not completed');const stamp=state.completedAt?.[id];if(!stamp)return '✅ '+tr('Selesai','Completed');const date=new Date(stamp);if(Number.isNaN(date.getTime()))return '✅ '+tr('Selesai','Completed');const weekday=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{weekday:'long'}).format(date);const datePart=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).format(date);const clock=new Intl.DateTimeFormat(state.lang==='id'?'id-ID':'en-GB',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(date);return '✅ '+tr('Selesai','Completed')+' - '+weekday+' '+datePart+' '+clock;}function item(d){return `<div class="card row"><div><div class="eyebrow">${tr('Hikmah','Wisdom')} ${String(d.id).padStart(2,'0')}</div><strong>${esc(tr(d.title,d.en))}</strong><div class="sub">${completedLabel(d.id)}</div></div><button class="btn" data-open="${d.id}">${tr('Baca','Read')} →</button></div>`}const ANALYTICS_RANGE_KEY='alhikam-analytics-range-v1';
 const ANALYTICS_FIRST_SEEN_KEY='alhikam-first-seen-v1';
 let analyticsRange='7d';
 try{const r=localStorage.getItem(ANALYTICS_RANGE_KEY);if(['7d','30d','1y','all'].includes(r))analyticsRange=r;if(!localStorage.getItem(ANALYTICS_FIRST_SEEN_KEY))localStorage.setItem(ANALYTICS_FIRST_SEEN_KEY,new Date().toISOString())}catch{}
@@ -1642,9 +1642,9 @@ function revealMenus(){
 }
 function scheduleMenuHide(){
   clearTimeout(chromeIdleTimer);
-  if(!state.autoHide||teleRunning||tutorialActive||document.hidden)return;
+  if(!(state.autoHide||state.tab==='home')||teleRunning||tutorialActive||document.hidden)return;
   chromeIdleTimer=setTimeout(()=>{
-    if(!state.autoHide||teleRunning||tutorialActive||document.hidden)return;
+    if(!(state.autoHide||state.tab==='home')||teleRunning||tutorialActive||document.hidden)return;
     const focused=document.activeElement;
     if(focused&&focused.matches('input,textarea,select,[contenteditable="true"]')){
       scheduleMenuHide();return;
@@ -1654,10 +1654,10 @@ function scheduleMenuHide(){
 }
 window.addEventListener('scroll',revealMenus,{passive:true});
 // pointerup (not pointerdown) avoids moving controls out from under a tap.
-document.addEventListener('pointerup',()=>{if(state.autoHide&&!teleRunning)revealMenus()},{passive:true});
-document.addEventListener('keydown',()=>{if(state.autoHide&&!teleRunning)revealMenus()});
-document.addEventListener('focusin',()=>{if(state.autoHide&&!teleRunning)revealMenus()});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.autoHide)revealMenus();else clearTimeout(chromeIdleTimer)});
+document.addEventListener('pointerup',()=>{if((state.autoHide||state.tab==='home')&&!teleRunning)revealMenus()},{passive:true});
+document.addEventListener('keydown',()=>{if((state.autoHide||state.tab==='home')&&!teleRunning)revealMenus()});
+document.addEventListener('focusin',()=>{if((state.autoHide||state.tab==='home')&&!teleRunning)revealMenus()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&(state.autoHide||state.tab==='home'))revealMenus();else clearTimeout(chromeIdleTimer)});
 function syncMockAdLanguage(){const top=document.getElementById('header-ad-copy');if(top)top.textContent=state.lang==='id'?'Banner iklan · 320 × 50':'Ad banner · 320 × 50';const bottom=document.getElementById('bottom-ad-copy');if(bottom)bottom.textContent=state.lang==='id'?'Banner iklan · 320 × 50':'Ad banner · 320 × 50';const el=document.getElementById('mock-ad-copy');if(el)el.textContent=state.lang==='id'?'Advertisement':'AdMob banner preview · 320 × 50';}
 function syncSplashLanguage(){const label=$('loading-label');if(label)label.textContent=state.lang==='en'?'Preparing your wisdom journey...':'Menyiapkan ruang hikmah...';const splash=$('splash');if(splash)splash.setAttribute('aria-label',state.lang==='en'?'Loading application':'Memuat aplikasi')}
 const colorThemes=[
@@ -1710,7 +1710,7 @@ function syncAutoHide(){
     b.setAttribute('aria-label',state.autoHide?'Matikan auto-hide menu':'Aktifkan auto-hide menu');
     b.title=state.autoHide?'Auto-hide ON · ketuk untuk mematikan':'Auto-hide OFF · ketuk untuk mengaktifkan';
   }
-  if(!state.autoHide&&!teleRunning)document.body.classList.remove('chrome-hidden');
+  if(!state.autoHide&&state.tab!=='home'&&!teleRunning)document.body.classList.remove('chrome-hidden');
   scheduleMenuHide();
 }
 $('autohide-toggle').onclick=()=>{
@@ -1802,7 +1802,7 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
 /* Billing diagnostic panel is inserted into the real Settings DOM after rendering.
    No function wrapping, so it works with the GoldenWisdom UI renderer. */
 (function(){
-  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 17';
+  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 18';
   const en=()=>state.lang==='en';
   const bilingual=(id,english)=>en()?english:id;
   function localizeDiagnostics(raw){
