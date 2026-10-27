@@ -557,6 +557,21 @@ body #skyline-hero.simple-wisdom-card .skyline-quote-btn{
 @media(max-width:360px){
  body #skyline-hero.simple-wisdom-card .wisdom-brand-ar{font-size:29px!important;left:11px!important}
 }
+
+/* Code 17: valid stylesheet rules for Home and other tabs */
+body .shell > .top,body .nav{
+ transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease!important;
+ will-change:transform,opacity;
+}
+body.chrome-hidden .shell > .top{
+ transform:translateY(calc(-100% - 24px))!important;
+ opacity:0!important;pointer-events:none!important;
+}
+body.chrome-hidden .nav{
+ transform:translateY(calc(100% + 5px))!important;
+ opacity:0!important;pointer-events:none!important;
+}
+body.home-dashboard .shell > .top,body.home-dashboard .nav{display:flex!important}
 </style><style>
 .copy-section{display:flex;justify-content:flex-end;align-items:center;margin:14px 0 0}.copy-section .copy-btn{min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center}.section-copy-btn{display:inline-flex;align-items:center;gap:7px;font-size:.87rem}.copy-toast{position:fixed;z-index:99999;left:50%;bottom:calc(94px + env(safe-area-inset-bottom, 0px));transform:translate(-50%,12px);background:#172c45;color:#fff;border:1px solid #c6a36a;border-radius:999px;padding:12px 20px;box-shadow:0 8px 30px #0004;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;white-space:nowrap;font-size:14px}.copy-toast.visible{opacity:1;transform:translate(-50%,0)}body.dark .copy-toast{background:#e8edf5;color:#111c2b}@media(prefers-reduced-motion:reduce){.copy-toast{transition:none}}
 </style><style>
@@ -1007,37 +1022,7 @@ body .simple-wisdom-card .skyline-quote{font-size:clamp(10px,3.4vw,14px)!importa
 body .simple-wisdom-card .skyline-author{font-size:9px!important;line-height:1.1!important;text-align:center!important;color:#E0CCA2!important}
 body .simple-wisdom-card .skyline-quote-controls{position:absolute!important;bottom:8px!important;left:0!important;right:0!important;top:auto!important;display:flex!important;justify-content:center!important;align-items:center!important;gap:12px!important;z-index:9!important;transform:none!important}
 body .simple-wisdom-card .skyline-quote-btn{width:29px!important;height:29px!important;min-width:29px!important;background:#365442!important;color:#F9F1E0!important;border:1px solid #9F956D!important}
-/* Code 15 Home auto-hide fix: use exactly the same chrome-hidden state,
-   transforms, and transition on Home as on all other tabs. */
-html.android-native body .shell > .top,
-html.android-native body .nav,
-body .shell > .top,
-body .nav {
-  transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease!important;
-  will-change:transform,opacity!important;
-}
-html.android-native body.chrome-hidden .shell > .top,
-body.chrome-hidden .shell > .top {
-  transform:translateY(calc(-100% - 24px))!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-html.android-native body.chrome-hidden .nav,
-body.chrome-hidden .nav {
-  transform:translateY(calc(100% + 5px))!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-/* Menus stay display:flex even while hidden, so they can animate. */
-html.android-native body.home-dashboard .shell > .top,
-body.home-dashboard .shell > .top,
-html.android-native body.home-dashboard .nav,
-body.home-dashboard .nav {
-  display:flex!important;
-}
-@media(prefers-reduced-motion:reduce){
-  html.android-native body .top,html.android-native body .nav,
-  body .top,body .nav {transition:none!important}
+
 }
 </style>
 <style id="golden-v343-quote-layout-fix">
@@ -1817,7 +1802,7 @@ window.addEventListener('load',()=>setTimeout(requestHikamNotificationsOnce,1200
 /* Billing diagnostic panel is inserted into the real Settings DOM after rendering.
    No function wrapping, so it works with the GoldenWisdom UI renderer. */
 (function(){
-  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 15';
+  const MARK='GoldenWisdom V3.4.6 · Billing Check · Code 17';
   const en=()=>state.lang==='en';
   const bilingual=(id,english)=>en()?english:id;
   function localizeDiagnostics(raw){
