@@ -6,8 +6,8 @@ android {
         applicationId 'id.sejutasantri.alhikam'
         minSdk 24
         targetSdk 36
-        versionCode 15
-        versionName 'v.1.1.15'
+        versionCode 16
+        versionName 'v.1.1.16'
     }
     signingConfigs {
         playUpload {

@@ -503,8 +503,7 @@ html.android-native body.dark .nav{
 html.android-native .shell{padding-bottom:calc(68px + var(--android-bottom-inset,0px))!important}
 
 /* Golden Wisdom V3.4 — nine-color home dashboard */
-body.home-dashboard.chrome-hidden .shell > .top{display:none!important}
-body.home-dashboard.chrome-hidden .nav{display:none!important}
+/* Legacy home-only display:none removed: keep menu elements rendered for smooth auto-hide. */
 body.home-dashboard .shell{padding-top:8px!important}
 body.home-dashboard #content{padding-bottom:calc(var(--native-banner-height,0px) + 20px)!important}
 .wisdom-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}
@@ -1008,20 +1007,37 @@ body .simple-wisdom-card .skyline-quote{font-size:clamp(10px,3.4vw,14px)!importa
 body .simple-wisdom-card .skyline-author{font-size:9px!important;line-height:1.1!important;text-align:center!important;color:#E0CCA2!important}
 body .simple-wisdom-card .skyline-quote-controls{position:absolute!important;bottom:8px!important;left:0!important;right:0!important;top:auto!important;display:flex!important;justify-content:center!important;align-items:center!important;gap:12px!important;z-index:9!important;transform:none!important}
 body .simple-wisdom-card .skyline-quote-btn{width:29px!important;height:29px!important;min-width:29px!important;background:#365442!important;color:#F9F1E0!important;border:1px solid #9F956D!important}
-/* Home uses the same transform/opacity movement as Auto-hide, not display:none. */
-html.android-native body.home-dashboard.chrome-hidden .top,body.home-dashboard.chrome-hidden .shell > .top{display:flex!important;transform:translateY(calc(-100% - 24px))!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
-html.android-native body.home-dashboard.chrome-hidden .nav,body.home-dashboard.chrome-hidden .nav{display:flex!important;transform:translateY(calc(100% + 5px))!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
-html.android-native body .top,html.android-native body .nav,body .shell > .top,body .nav{transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease,visibility 0s linear .42s!important;will-change:transform,opacity!important}
-html.android-native body:not(.chrome-hidden) .top,html.android-native body:not(.chrome-hidden) .nav{visibility:visible!important;opacity:1!important;transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease,visibility 0s!important}
-@media(prefers-reduced-motion:reduce){html.android-native body .top,html.android-native body .nav{transition:none!important}}
-
-/* Code 15: Beranda obeys the same 3-second chrome-hidden timer as other tabs. */
-html.android-native body.home-dashboard:not(.chrome-hidden) .top,
-html.android-native body.home-dashboard:not(.chrome-hidden) .nav,
-body.home-dashboard:not(.chrome-hidden) .shell > .top,
-body.home-dashboard:not(.chrome-hidden) .nav {
-  display:flex!important;transform:none!important;opacity:1!important;
-  visibility:visible!important;pointer-events:auto!important;
+/* Code 15 Home auto-hide fix: use exactly the same chrome-hidden state,
+   transforms, and transition on Home as on all other tabs. */
+html.android-native body .shell > .top,
+html.android-native body .nav,
+body .shell > .top,
+body .nav {
+  transition:transform .42s cubic-bezier(.22,.75,.27,1),opacity .42s ease!important;
+  will-change:transform,opacity!important;
+}
+html.android-native body.chrome-hidden .shell > .top,
+body.chrome-hidden .shell > .top {
+  transform:translateY(calc(-100% - 24px))!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+html.android-native body.chrome-hidden .nav,
+body.chrome-hidden .nav {
+  transform:translateY(calc(100% + 5px))!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+/* Menus stay display:flex even while hidden, so they can animate. */
+html.android-native body.home-dashboard .shell > .top,
+body.home-dashboard .shell > .top,
+html.android-native body.home-dashboard .nav,
+body.home-dashboard .nav {
+  display:flex!important;
+}
+@media(prefers-reduced-motion:reduce){
+  html.android-native body .top,html.android-native body .nav,
+  body .top,body .nav {transition:none!important}
 }
 </style>
 <style id="golden-v343-quote-layout-fix">
